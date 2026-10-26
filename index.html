@@ -92,16 +92,26 @@ $("authForm").addEventListener("submit",async e=>{
    if(exists.data) throw Error("Bu username band. Boshqasini tanlang.");
    const r=await db.auth.signUp({email,password,options:{data:{username,display_name:name}}});
    if(r.error) throw r.error;
-   if(r.data.session && r.data.user){
+      if(r.data.session && r.data.user){
     currentUser=r.data.user;
+
     const existing=await getProfile(currentUser.id);
-    if(existing) profile=existing;
-    else profile=await makeProfile(currentUser,username,name);
+
+    if(existing){
+     profile=existing;
+    }else{
+     profile=await makeProfile(currentUser,username,name);
+    }
+
     await enterApp();
    }else{
-    toast("Hisob yaratildi! Emailingizga kelgan tasdiqlash havolasini bosing. Keyin shu email va parol bilan kiring.");
-    setMode("login");
-   }
+    throw Error(
+     "Sessiya ochilmadi. Supabase'da " +
+     "Authentication → Sign In / Providers → Email " +
+     "bo‘limiga kirib, Confirm email sozlamasini " +
+     "OFF qiling va Save bosing. Keyin qayta urinib ko‘ring."
+    );
+      }
   }else{
    const r=await db.auth.signInWithPassword({email,password});
    if(r.error) throw r.error;
