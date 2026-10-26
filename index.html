@@ -25,66 +25,60 @@ h1{margin:0;color:#65a5ff}
 .person small{display:block;color:#a9b8d0;margin-top:5px;font-weight:normal}
 #conversation{display:flex;flex-direction:column;min-width:0}
 .chathead{padding:16px;border-bottom:1px solid #263650}
-#messages{flex:1;min-height:350px;max-height:60vh;overflow:auto;padding:16px;display:flex;flex-direction:column;gap:10px}
+#messages{flex:1;min-height:260px;max-height:60vh;overflow:auto;padding:16px;display:flex;flex-direction:column;gap:10px}
 .bubble{max-width:85%;align-self:flex-start;background:#192942;padding:11px 13px;border-radius:14px;overflow-wrap:anywhere;white-space:pre-wrap}
 .bubble.mine{align-self:flex-end;background:#1459b8}
 .sender{font-size:12px;color:#c1d9ff;margin-bottom:5px}
 .composer{display:flex;gap:8px;padding:14px;border-top:1px solid #263650;background:#101a2c}
 .composer input{min-width:0;margin:0}
 #status{padding:12px 18px;color:#b9d6ff;overflow-wrap:anywhere}
-.hidden{display:none!important}
 @media(max-width:650px){
- .layout{grid-template-columns:1fr;min-height:0}
- .sidebar{border-right:0;border-bottom:1px solid #263650}
- #messages{min-height:260px}
+.layout{grid-template-columns:1fr;min-height:0}
+.sidebar{border-right:0;border-bottom:1px solid #263650}
 }
 </style>
 </head>
 <body>
 <div class="app">
 <header>
-  <h1>🔵 Akosh Chat</h1>
-  <div class="muted">Do‘stlaring bilan shaxsiy suhbat</div>
+<h1>🔵 Akosh Chat</h1>
+<div class="muted">Do‘stlaring bilan shaxsiy suhbat</div>
 </header>
 
 <section id="auth">
-  <h2 id="authTitle">Hisob yaratish</h2>
-  <p class="muted">SMS kerak emas. Username, email va parol bilan kir.</p>
-  <input id="username" placeholder="Username: akosh11" maxlength="24">
-  <input id="email" type="email" placeholder="Email" autocomplete="email">
-  <input id="password" type="password" placeholder="Parol (kamida 6 belgi)" autocomplete="current-password">
-  <button id="signup" style="width:100%;margin-top:8px">Ro‘yxatdan o‘tish</button>
-  <button id="login" style="width:100%;margin-top:8px;background:#263650">Hisobga kirish</button>
+<h2>Hisob yaratish</h2>
+<p class="muted">Username, email va parol bilan kir.</p>
+<input id="username" placeholder="Username: akosh11" maxlength="24">
+<input id="email" type="email" placeholder="Email" autocomplete="email">
+<input id="password" type="password" placeholder="Parol (kamida 6 belgi)" autocomplete="current-password">
+<button id="signup" style="width:100%;margin-top:8px">Ro‘yxatdan o‘tish</button>
+<button id="login" style="width:100%;margin-top:8px;background:#263650">Hisobga kirish</button>
 </section>
 
 <section id="main">
 <div class="layout">
-  <aside class="sidebar">
-    <div id="myName" class="section-title"></div>
-    <button id="logout" style="width:100%;background:#263650">Chiqish</button>
+<aside class="sidebar">
+<div id="myName" class="section-title"></div>
+<button id="logout" style="width:100%;background:#263650">Chiqish</button>
+<div class="section-title">🔍 Do‘st qidirish</div>
+<input id="search" placeholder="Username yoz: akosh11">
+<button id="searchBtn" style="width:100%">Qidirish</button>
+<div id="searchResults"></div>
+<div class="section-title">💬 Shaxsiy chatlar</div>
+<div id="chatList" class="muted">Chatlar yuklanmoqda...</div>
+</aside>
 
-    <div class="section-title">🔍 Do‘st qidirish</div>
-    <input id="search" placeholder="Username yoz: akosh11">
-    <button id="searchBtn" style="width:100%">Qidirish</button>
-    <div id="searchResults"></div>
-
-    <div class="section-title">💬 Shaxsiy chatlar</div>
-    <div id="chatList" class="muted">Chatlar yuklanmoqda...</div>
-  </aside>
-
-  <section id="conversation">
-    <div class="chathead">
-      <strong id="chatTitle">Suhbatni tanlang</strong>
-      <div id="chatHint" class="muted">Do‘stni username orqali qidiring.</div>
-    </div>
-    <div id="messages">
-      <p class="muted">Shaxsiy suhbatni boshlash uchun chapdan do‘st qidiring.</p>
-    </div>
-    <div class="composer">
-      <input id="messageInput" maxlength="2000" placeholder="Xabar yoz..." disabled>
-      <button id="send" disabled>Yuborish</button>
-    </div>
-  </section>
+<section id="conversation">
+<div class="chathead">
+<strong id="chatTitle">Suhbatni tanlang</strong>
+<div id="chatHint" class="muted">Do‘stni username orqali qidiring.</div>
+</div>
+<div id="messages"><p class="muted">Shaxsiy suhbatni boshlash uchun do‘st qidiring.</p></div>
+<div class="composer">
+<input id="messageInput" maxlength="2000" placeholder="Xabar yoz..." disabled>
+<button id="send" disabled>Yuborish</button>
+</div>
+</section>
 </div>
 </section>
 <p id="status" role="status"></p>
@@ -93,100 +87,101 @@ h1{margin:0;color:#65a5ff}
 <script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
 import {
-  getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,
-  onAuthStateChanged,signOut
+ getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,
+ onAuthStateChanged,signOut
 } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
 import {
-  getFirestore,doc,getDoc,setDoc,runTransaction,collection,addDoc,
-  query,where,onSnapshot,orderBy,limit,serverTimestamp
+ getFirestore,doc,getDoc,setDoc,runTransaction,collection,addDoc,
+ query,where,onSnapshot,orderBy,limit,serverTimestamp
 } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 
 const firebaseConfig={
-  apiKey:"AIzaSyCSdBqAa2QYe7bGQ7SeC-BoSmbx6PwUku8",
-  authDomain:"akoshgram-b6bd4.firebaseapp.com",
-  projectId:"akoshgram-b6bd4",
-  storageBucket:"akoshgram-b6bd4.firebasestorage.app",
-  messagingSenderId:"374045331367",
-  appId:"1:374045331367:web:e2a1ea9b7370702f453082"
+ apiKey:"AIzaSyCSdBqAa2QYe7bGQ7SeC-BoSmbx6PwUku8",
+ authDomain:"akoshgram-b6bd4.firebaseapp.com",
+ projectId:"akoshgram-b6bd4",
+ storageBucket:"akoshgram-b6bd4.firebasestorage.app",
+ messagingSenderId:"374045331367",
+ appId:"1:374045331367:web:e2a1ea9b7370702f453082"
 };
-const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app);
+
+const app=initializeApp(firebaseConfig);
+const auth=getAuth(app);
+const db=getFirestore(app);
 const $=id=>document.getElementById(id);
 const say=t=>$("status").textContent=t;
 const uname=v=>v.trim().replace(/^@/,"").toLowerCase();
-let me=null,myUsername="",activeChat=null,activeFriend=null;
-let stopMessages=null,stopChats=null,stopProfiles=null,busy=false;
+
+let me=null,myUsername="",activeChat=null,busy=false;
+let stopMessages=null,stopChats=null;
 
 function validName(v){return /^[a-z0-9_]{3,24}$/.test(v)}
 
-async function createProfile(user, requestedName){
-  const name=uname(requestedName);
-  if(!validName(name))throw Error("Username 3–24 belgi bo‘lsin: harf, raqam va _.");
+async function createProfile(user,requestedName){
+ const name=uname(requestedName);
+ if(!validName(name))throw Error("Username 3–24 belgi bo‘lsin: harf, raqam va _.");
 
-  await runTransaction(db,async tx=>{
-    const userRef=doc(db,"users",user.uid);
-    const nameRef=doc(db,"usernames",name);
-    const [profile,nameDoc]=await Promise.all([tx.get(userRef),tx.get(nameRef)]);
+ await runTransaction(db,async tx=>{
+  const userRef=doc(db,"users",user.uid);
+  const nameRef=doc(db,"usernames",name);
+  const profile=await tx.get(userRef);
+  const nameDoc=await tx.get(nameRef);
 
-    if(profile.exists()){
-      const existing=profile.data().username;
-      if(existing){
-        myUsername=existing;
-        return;
-      }
-    }
-    if(nameDoc.exists() && nameDoc.data().uid!==user.uid){
-      throw Error("Bu username band. Boshqasini tanlang.");
-    }
-    tx.set(userRef,{username:name,createdAt:serverTimestamp()});
-    tx.set(nameRef,{uid:user.uid,username:name});
-    myUsername=name;
-  });
-}
-
-async function loadProfile(user){
-  const snap=await getDoc(doc(db,"users",user.uid));
-  if(snap.exists() && snap.data().username){
-    myUsername=snap.data().username;
-    return;
+  if(profile.exists()&&profile.data().username){
+   myUsername=profile.data().username;
+   return;
   }
-  const name=uname($("username").value);
-  if(!validName(name)){
-    say("Bu hisobda username yo‘q. Username maydoniga yangi username yozib, ro‘yxatdan o‘tish tugmasini bosmang — avval yordam so‘rang.");
-    throw Error("Ushbu eski hisob uchun username sozlanmagan.");
+  if(nameDoc.exists()&&nameDoc.data().uid!==user.uid){
+   throw Error("Bu username band. Boshqasini tanlang.");
   }
-  await createProfile(user,name);
+  tx.set(userRef,{username:name,createdAt:serverTimestamp()});
+  tx.set(nameRef,{uid:user.uid,username:name});
+  myUsername=name;
+ });
 }
 
 $("signup").onclick=async()=>{
  if(busy)return;
- const name=uname($("username").value),email=$("email").value.trim(),password=$("password").value;
+ const name=uname($("username").value);
+ const email=$("email").value.trim();
+ const password=$("password").value;
+
  if(!validName(name)){say("Username 3–24 belgi bo‘lsin: harf, raqam va _.");return}
+ if(!email){say("Email kiriting.");return}
  if(password.length<6){say("Parol kamida 6 belgi bo‘lsin.");return}
+
  busy=true;
+ $("signup").disabled=true;
  try{
-   const cred=await createUserWithEmailAndPassword(auth,email,password);
-   await createProfile(cred.user,name);
-   say("Hisob yaratildi!");
+  const cred=await createUserWithEmailAndPassword(auth,email,password);
+  await createProfile(cred.user,name);
+  say("Hisob yaratildi!");
  }catch(e){
-   say("Xato: "+e.message);
- }finally{busy=false}
+  console.error("SIGNUP ERROR:",e);
+  say("Ro‘yxatdan o‘tish xatosi: "+(e.code||"")+" "+e.message);
+ }finally{
+  busy=false;
+  $("signup").disabled=false;
+ }
 };
 
 $("login").onclick=async()=>{
  try{
-   await signInWithEmailAndPassword(auth,$("email").value.trim(),$("password").value);
- }catch(e){say("Kirish xatosi: "+e.message)}
+  await signInWithEmailAndPassword(auth,$("email").value.trim(),$("password").value);
+ }catch(e){
+  say("Kirish xatosi: "+(e.code||"")+" "+e.message);
+ }
 };
 
 function stopListeners(){
  if(stopMessages)stopMessages();
  if(stopChats)stopChats();
- if(stopProfiles)stopProfiles();
- stopMessages=stopChats=stopProfiles=null;
+ stopMessages=null;
+ stopChats=null;
 }
 
 async function openChat(friendUid,friendName){
- if(!me || friendUid===me.uid){say("O‘zing bilan chat ocholmaysan.");return}
+ if(!me||friendUid===me.uid){say("O‘zing bilan chat ocholmaysan.");return}
+
  try{
   const ids=[me.uid,friendUid].sort();
   const chatId=ids.join("__");
@@ -194,18 +189,17 @@ async function openChat(friendUid,friendName){
   const snap=await getDoc(chatRef);
 
   if(!snap.exists()){
-    await setDoc(chatRef,{
-      members:ids,
-      createdBy:me.uid,
-      createdAt:serverTimestamp()
-    });
-  }else if(!snap.data().members.includes(me.uid) ||
-           !snap.data().members.includes(friendUid)){
-    throw Error("Chat a’zolari tekshiruvdan o‘tmadi.");
+   await setDoc(chatRef,{
+    members:ids,
+    createdBy:me.uid,
+    createdAt:serverTimestamp()
+   });
+  }else if(!(snap.data().members||[]).includes(me.uid)||
+           !(snap.data().members||[]).includes(friendUid)){
+   throw Error("Chat a’zolari tekshiruvdan o‘tmadi.");
   }
 
   activeChat=chatId;
-  activeFriend={uid:friendUid,username:friendName};
   $("chatTitle").textContent="@"+friendName;
   $("chatHint").textContent="Shaxsiy chat";
   $("messageInput").disabled=false;
@@ -213,36 +207,51 @@ async function openChat(friendUid,friendName){
 
   if(stopMessages)stopMessages();
   $("messages").replaceChildren();
-  const q=query(collection(db,"chats",chatId,"messages"),orderBy("createdAt","asc"),limit(200));
+
+  const q=query(
+   collection(db,"chats",chatId,"messages"),
+   orderBy("createdAt","asc"),
+   limit(200)
+  );
 
   stopMessages=onSnapshot(q,s=>{
-    const list=$("messages");list.replaceChildren();
-    s.forEach(item=>{
-      const d=item.data(),bubble=document.createElement("div");
-      bubble.className="bubble"+(d.senderId===me.uid?" mine":"");
-      const sender=document.createElement("div");
-      sender.className="sender";
-      sender.textContent=d.senderId===me.uid?"Siz":"@"+friendName;
-      const body=document.createElement("div");
-      body.textContent=d.text||"";
-      bubble.append(sender,body);list.append(bubble);
-    });
-    list.scrollTop=list.scrollHeight;
+   const list=$("messages");
+   list.replaceChildren();
+   s.forEach(item=>{
+    const d=item.data();
+    const bubble=document.createElement("div");
+    bubble.className="bubble"+(d.senderId===me.uid?" mine":"");
+    const sender=document.createElement("div");
+    sender.className="sender";
+    sender.textContent=d.senderId===me.uid?"Siz":"@"+friendName;
+    const body=document.createElement("div");
+    body.textContent=d.text||"";
+    bubble.append(sender,body);
+    list.append(bubble);
+   });
+   list.scrollTop=list.scrollHeight;
   },e=>say("Xabar xatosi: "+e.message));
-}catch(e){
-  console.error("OPEN CHAT ERROR:", e);
-  say("Chat ochilmadi: "+e.code+" — "+e.message);
+
+ }catch(e){
+  console.error("OPEN CHAT ERROR:",e);
+  say("Chat ochilmadi: "+(e.code||"")+" "+e.message);
+ }
 }
+
 $("searchBtn").onclick=async()=>{
  if(!me)return;
- const name=uname($("search").value),results=$("searchResults");
+ const name=uname($("search").value);
+ const results=$("searchResults");
  results.replaceChildren();
+
  if(!validName(name)){say("To‘liq username kiriting.");return}
+
  try{
   const s=await getDoc(doc(db,"usernames",name));
   if(!s.exists()){say("Bunday username topilmadi.");return}
   const data=s.data();
   if(data.uid===me.uid){say("Bu sening username’ing.");return}
+
   const btn=document.createElement("button");
   btn.className="person";
   btn.textContent="@"+data.username;
@@ -252,7 +261,9 @@ $("searchBtn").onclick=async()=>{
   btn.onclick=()=>openChat(data.uid,data.username);
   results.append(btn);
   say("Foydalanuvchi topildi.");
- }catch(e){say("Qidirish xatosi: "+e.message)}
+ }catch(e){
+  say("Qidirish xatosi: "+(e.code||"")+" "+e.message);
+ }
 };
 
 $("search").addEventListener("keydown",e=>{
@@ -262,59 +273,92 @@ $("search").addEventListener("keydown",e=>{
 $("send").onclick=async()=>{
  const text=$("messageInput").value.trim();
  if(!me||!activeChat||!text||busy)return;
- busy=true;$("send").disabled=true;
+
+ busy=true;
+ $("send").disabled=true;
  try{
   await addDoc(collection(db,"chats",activeChat,"messages"),{
-    text,senderId:me.uid,createdAt:serverTimestamp()
+   text,senderId:me.uid,createdAt:serverTimestamp()
   });
   $("messageInput").value="";
   say("");
- }catch(e){say("Xabar yuborilmadi: "+e.message)}
- finally{busy=false;$("send").disabled=false}
+ }catch(e){
+  say("Xabar yuborilmadi: "+(e.code||"")+" "+e.message);
+ }finally{
+  busy=false;
+  $("send").disabled=false;
+ }
 };
+
 $("messageInput").addEventListener("keydown",e=>{
  if(e.key==="Enter")$("send").click();
 });
 $("logout").onclick=()=>signOut(auth);
 
 onAuthStateChanged(auth,async user=>{
- stopListeners();me=user;activeChat=null;activeFriend=null;
+ stopListeners();
+ me=user;
+ activeChat=null;
  $("auth").style.display=user?"none":"block";
  $("main").style.display=user?"block":"none";
- $("messageInput").disabled=true;$("send").disabled=true;
+ $("messageInput").disabled=true;
+ $("send").disabled=true;
  $("messages").replaceChildren();
  $("chatList").textContent="";
 
  if(!user)return;
+
  try{
-  await loadProfile(user);
+  const profile=await getDoc(doc(db,"users",user.uid));
+
+  if(profile.exists()&&profile.data().username){
+   myUsername=profile.data().username;
+  }else{
+   const name=uname($("username").value);
+   if(!validName(name)){
+    say("Profil username topilmadi. Chiqib, ro‘yxatdan o‘tishda username kiriting yoki eski hisob uchun yordam so‘rang.");
+    return;
+   }
+   await createProfile(user,name);
+  }
+
   $("myName").textContent="@"+myUsername;
 
   stopChats=onSnapshot(
-    query(collection(db,"chats"),where("members","array-contains",user.uid)),
-    async snap=>{
-      const list=$("chatList");list.replaceChildren();
-      if(snap.empty){
-        list.textContent="Hali shaxsiy chat yo‘q. Username qidirib boshlang.";
-        return;
-      }
-      for(const item of snap.docs){
-        const data=item.data();
-        const friendUid=(data.members||[]).find(id=>id!==user.uid);
-        if(!friendUid)continue;
-        try{
-          const profile=await getDoc(doc(db,"users",friendUid));
-          const friendName=profile.exists()?profile.data().username:"foydalanuvchi";
-          const btn=document.createElement("button");
-          btn.className="person";
-          btn.textContent="@"+friendName;
-          btn.onclick=()=>openChat(friendUid,friendName);
-          list.append(btn);
-        }catch{}
-      }
-    },e=>say("Chatlar yuklanmadi: "+e.message)
+   query(collection(db,"chats"),where("members","array-contains",user.uid)),
+   async snap=>{
+    const list=$("chatList");
+    list.replaceChildren();
+
+    if(snap.empty){
+     list.textContent="Hali shaxsiy chat yo‘q. Username qidirib boshlang.";
+     return;
+    }
+
+    for(const item of snap.docs){
+     const data=item.data();
+     const friendUid=(data.members||[]).find(id=>id!==user.uid);
+     if(!friendUid)continue;
+
+     try{
+      const p=await getDoc(doc(db,"users",friendUid));
+      const friendName=p.exists()?p.data().username:"foydalanuvchi";
+      const btn=document.createElement("button");
+      btn.className="person";
+      btn.textContent="@"+friendName;
+      btn.onclick=()=>openChat(friendUid,friendName);
+      list.append(btn);
+     }catch(e){
+      console.error("PROFILE READ ERROR:",e);
+     }
+    }
+   },
+   e=>say("Chatlar yuklanmadi: "+e.message)
   );
- }catch(e){say("Profil xatosi: "+e.message)}
+ }catch(e){
+  console.error("PROFILE ERROR:",e);
+  say("Profil xatosi: "+(e.code||"")+" "+e.message);
+ }
 });
 </script>
 </body>
