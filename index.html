@@ -4,51 +4,162 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080d18">
   <title>Akosh Chat</title>
+
   <style>
-    *{box-sizing:border-box}
-    body{margin:0;min-height:100vh;display:grid;place-items:center;background:#080d18;color:white;font-family:Arial,sans-serif}
-    .card{width:min(420px,92%);padding:28px;background:#101a2c;border:1px solid #24334e;border-radius:22px}
-    h1{text-align:center}
-    p{color:#a9b8d0;line-height:1.5}
-    input,button{width:100%;padding:14px;margin-top:12px;border-radius:10px;font-size:16px}
-    input{background:#091222;border:1px solid #30415f;color:white}
-    button{background:#1877f2;color:white;border:0;font-weight:bold;cursor:pointer}
-    #message{overflow-wrap:anywhere;font-size:14px}
-    #chat{display:none}
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh;
+      background: #080d18; color: #f4f7ff;
+      font-family: Arial, sans-serif;
+    }
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+    .app {
+      max-width: 850px; margin: auto; min-height: 100vh;
+      display: flex; flex-direction: column;
+      border-left: 1px solid #1c2940;
+      border-right: 1px solid #1c2940;
+      background: #0c1424;
+    }
+    header {
+      padding: 18px; background: #101c30;
+      border-bottom: 1px solid #263650;
+      display: flex; align-items: center;
+      justify-content: space-between; gap: 12px;
+    }
+    h1 { margin: 0; font-size: 23px; }
+    .sub { color: #9aacc8; font-size: 13px; margin-top: 5px; }
+    .content { padding: 18px; }
+    .panel {
+      background: #101c30; border: 1px solid #263650;
+      border-radius: 16px; padding: 20px; margin: 18px;
+    }
+    input {
+      width: 100%; padding: 13px; margin: 8px 0;
+      background: #081120; color: white;
+      border: 1px solid #334663; border-radius: 10px;
+      outline: none;
+    }
+    input:focus { border-color: #3988ff; }
+    button {
+      border: 0; border-radius: 10px; padding: 12px 15px;
+      background: #1877f2; color: white; font-weight: bold;
+    }
+    button:disabled { opacity: .55; cursor: wait; }
+    button.secondary { background: #263650; }
+    button.small { padding: 9px 11px; font-size: 13px; }
+    .full { width: 100%; margin-top: 8px; }
+    #chatView { display: none; flex: 1; flex-direction: column; }
+    .roombar {
+      padding: 14px 18px; border-bottom: 1px solid #263650;
+      display: flex; justify-content: space-between;
+      align-items: center; gap: 10px;
+    }
+    #messages {
+      padding: 18px; display: flex; flex-direction: column;
+      gap: 12px; flex: 1; min-height: 300px;
+      max-height: 58vh; overflow-y: auto;
+    }
+    .bubble {
+      max-width: 82%; align-self: flex-start;
+      padding: 11px 13px; border-radius: 14px;
+      background: #192942; overflow-wrap: anywhere;
+      white-space: pre-wrap;
+    }
+    .bubble.mine {
+      align-self: flex-end; background: #1459b8;
+    }
+    .sender { font-size: 12px; color: #a9caff; margin-bottom: 6px; }
+    .bodytext { line-height: 1.45; }
+    .time { color: #c0d2ed; font-size: 10px; margin-top: 6px; }
+    .composer {
+      display: flex; gap: 8px; padding: 14px;
+      background: #101c30; border-top: 1px solid #263650;
+    }
+    .composer input { margin: 0; min-width: 0; }
+    .composer button { flex-shrink: 0; }
+    .hint { color: #9aacc8; font-size: 13px; line-height: 1.5; }
+    #status { color: #b7d2ff; padding: 0 18px 14px; overflow-wrap: anywhere; }
+    #recaptcha { margin: 12px 0; }
+    .hidden { display: none !important; }
+    @media (max-width: 500px) {
+      .panel { margin: 12px; padding: 16px; }
+      header { padding: 15px; }
+      #messages { padding: 12px; }
+      .bubble { max-width: 90%; }
+    }
   </style>
 </head>
+
 <body>
-  <main class="card">
-    <h1>🔵 Akosh Chat</h1>
-    <p>Do‘stlaring bilan suhbatlashish uchun telefon raqaming orqali kir.</p>
+  <main class="app">
+    <header>
+      <div>
+        <h1>🔵 Akosh Chat</h1>
+        <div class="sub">Do‘stlar bilan suhbatlash</div>
+      </div>
+      <span id="onlineState" class="sub">Xavfsiz kirish</span>
+    </header>
 
-    <section id="login">
-      <input id="phone" type="tel" placeholder="+998901234567">
+    <section id="loginView" class="panel">
+      <h2>Hisobga kirish</h2>
+      <p class="hint">Telefon raqamingni xalqaro formatda yoz.</p>
+      <input id="phone" type="tel" placeholder="+998901234567"
+             autocomplete="tel">
       <div id="recaptcha"></div>
-      <button id="send">SMS kod yuborish</button>
-      <input id="sms" placeholder="SMS kod" inputmode="numeric">
-      <button id="verify">Kodni tasdiqlash</button>
+      <button id="sendCode" class="full">SMS kod yuborish</button>
+      <input id="smsCode" inputmode="numeric" placeholder="Tasdiqlash kodi">
+      <button id="verifyCode" class="full">Kirish</button>
     </section>
 
-    <section id="chat">
-      <h2>Xush kelibsan!</h2>
-      <p id="account"></p>
-      <p>Telefon orqali kirish muvaffaqiyatli. Chat funksiyalarini keyingi bosqichda ulaymiz.</p>
-      <button id="logout">Chiqish</button>
+    <section id="chatView">
+      <div class="roombar">
+        <div>
+          <strong>🌐 Umumiy xona</strong>
+          <div class="sub" id="myAccount"></div>
+        </div>
+        <button id="logout" class="secondary small">Chiqish</button>
+      </div>
+
+      <div class="content">
+        <p class="hint">
+          Bu sinov xonasi. Bu yerga yuborilgan xabarlarni kirgan
+          boshqa foydalanuvchilar ham ko‘rishi mumkin.
+        </p>
+      </div>
+
+      <div id="messages" aria-live="polite">
+        <p class="hint">Xabarlar yuklanmoqda...</p>
+      </div>
+
+      <div class="composer">
+        <input id="messageInput" maxlength="2000"
+               placeholder="Xabaringni yoz..."
+               autocomplete="off">
+        <button id="sendMessage">Yuborish</button>
+      </div>
     </section>
-    <p id="message" role="status"></p>
+
+    <p id="status" role="status"></p>
   </main>
 
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+    import {
+      initializeApp
+    } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+
     import {
       getAuth, RecaptchaVerifier, signInWithPhoneNumber,
       onAuthStateChanged, signOut
     } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
 
-    // Firebase Console → Project settings → Your apps → Config
-    // Quyidagi qiymatlarni o'zingdagi Config qiymatlari bilan almashtir.
+    import {
+      getFirestore, collection, addDoc, query, orderBy,
+      limit, onSnapshot, serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+
     const firebaseConfig = {
       apiKey: "AIzaSyCSdBqAa2QYe7bGQ7SeC-BoSmbx6PwUku8",
       authDomain: "akoshgram-b6bd4.firebaseapp.com",
@@ -58,57 +169,177 @@
       appId: "1:374045331367:web:e2a1ea9b7370702f453082"
     };
 
-    const message = document.getElementById("message");
-    const showMessage = (text) => message.textContent = text;
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const $ = id => document.getElementById(id);
+    const status = text => $("status").textContent = text;
+
     let confirmation = null;
     let verifier = null;
+    let stopMessages = null;
+    let sending = false;
 
     try {
       verifier = new RecaptchaVerifier(auth, "recaptcha", {
         size: "normal",
-        callback: () => showMessage("Tekshiruv muvaffaqiyatli.")
+        callback: () => status("Robot emasliging tekshirildi.")
       });
       await verifier.render();
     } catch (error) {
-      showMessage("reCAPTCHA xatosi: " + error.message);
+      status("Tekshiruvni yuklashda xato: " + error.message);
     }
 
-    document.getElementById("send").onclick = async () => {
-      const phone = document.getElementById("phone").value.trim();
+    $("sendCode").onclick = async () => {
+      const phone = $("phone").value.trim();
+
       if (!phone.startsWith("+")) {
-        showMessage("Raqamni xalqaro formatda kiriting. Masalan: +998901234567");
+        status("Raqamni +998901234567 formatida kiriting.");
         return;
       }
+
       try {
+        $("sendCode").disabled = true;
         confirmation = await signInWithPhoneNumber(auth, phone, verifier);
-        showMessage("SMS yuborildi. Kodni kiriting.");
+        status("SMS yuborildi. Kodni kiriting.");
       } catch (error) {
-        showMessage("SMS yuborilmadi: " + error.message);
+        status("SMS xatosi: " + error.message);
+      } finally {
+        $("sendCode").disabled = false;
       }
     };
 
-    document.getElementById("verify").onclick = async () => {
+    $("verifyCode").onclick = async () => {
       if (!confirmation) {
-        showMessage("Avval SMS kod yuborish tugmasini bosing.");
+        status("Avval SMS kod yuboring.");
         return;
       }
+
       try {
-        await confirmation.confirm(document.getElementById("sms").value.trim());
-        showMessage("Kirish muvaffaqiyatli!");
+        await confirmation.confirm($("smsCode").value.trim());
+        status("Kirish muvaffaqiyatli!");
       } catch (error) {
-        showMessage("Kod xato yoki muddati tugagan: " + error.message);
+        status("Kod tasdiqlanmadi: " + error.message);
+      }
+    };
+
+    function showMessages(user) {
+      if (stopMessages) {
+        stopMessages();
+        stopMessages = null;
+      }
+
+      const list = $("messages");
+      list.replaceChildren();
+
+      const messagesQuery = query(
+        collection(db, "rooms", "lobby", "messages"),
+        orderBy("createdAt", "asc"),
+        limit(100)
+      );
+
+      stopMessages = onSnapshot(messagesQuery, snapshot => {
+        list.replaceChildren();
+
+        if (snapshot.empty) {
+          const empty = document.createElement("p");
+          empty.className = "hint";
+          empty.textContent = "Hali xabar yo‘q. Birinchi bo‘lib yoz!";
+          list.appendChild(empty);
+          return;
+        }
+
+        snapshot.forEach(docSnap => {
+          const data = docSnap.data();
+          const bubble = document.createElement("article");
+          bubble.className = "bubble" +
+            (data.senderId === user.uid ? " mine" : "");
+
+          const sender = document.createElement("div");
+          sender.className = "sender";
+          sender.textContent = data.senderId === user.uid
+            ? "Siz"
+            : (data.senderPhone || "Akosh Chat foydalanuvchisi");
+
+          const body = document.createElement("div");
+          body.className = "bodytext";
+          body.textContent = data.text || "";
+
+          const time = document.createElement("div");
+          time.className = "time";
+          const date = data.createdAt?.toDate?.();
+          time.textContent = date
+            ? date.toLocaleTimeString("uz-UZ", {
+                hour: "2-digit", minute: "2-digit"
+              })
+            : "Hozir";
+
+          bubble.append(sender, body, time);
+          list.appendChild(bubble);
+        });
+
+        list.scrollTop = list.scrollHeight;
+      }, error => {
+        status("Xabarlarni yuklashda xato: " + error.message);
+      });
+    }
+
+    async function sendMessage() {
+      const user = auth.currentUser;
+      const text = $("messageInput").value.trim();
+
+      if (!user || !text || sending) return;
+
+      try {
+        sending = true;
+        $("sendMessage").disabled = true;
+
+        await addDoc(collection(db, "rooms", "lobby", "messages"), {
+          text,
+          senderId: user.uid,
+          senderPhone: user.phoneNumber || "",
+          createdAt: serverTimestamp()
+        });
+
+        $("messageInput").value = "";
+        status("");
+      } catch (error) {
+        status("Xabar yuborilmadi: " + error.message);
+      } finally {
+        sending = false;
+        $("sendMessage").disabled = false;
+      }
+    }
+
+    $("sendMessage").onclick = sendMessage;
+    $("messageInput").addEventListener("keydown", event => {
+      if (event.key === "Enter") sendMessage();
+    });
+
+    $("logout").onclick = async () => {
+      try {
+        await signOut(auth);
+        status("Hisobdan chiqdingiz.");
+      } catch (error) {
+        status("Chiqishda xato: " + error.message);
       }
     };
 
     onAuthStateChanged(auth, user => {
-      document.getElementById("login").style.display = user ? "none" : "block";
-      document.getElementById("chat").style.display = user ? "block" : "none";
-      document.getElementById("account").textContent = user?.phoneNumber || "";
-    });
+      $("loginView").style.display = user ? "none" : "block";
+      $("chatView").style.display = user ? "flex" : "none";
+      $("onlineState").textContent = user ? "Chatga ulangan" : "Kirish kerak";
 
-    document.getElementById("logout").onclick = () => signOut(auth);
+      if (user) {
+        $("myAccount").textContent = user.phoneNumber || "";
+        showMessages(user);
+      } else {
+        if (stopMessages) stopMessages();
+        stopMessages = null;
+        $("messages").replaceChildren();
+      }
+    });
   </script>
 </body>
 </html>
