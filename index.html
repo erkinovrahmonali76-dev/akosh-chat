@@ -3,343 +3,230 @@
 <html lang="uz">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#080d18">
   <title>Akosh Chat</title>
-
   <style>
-    * { box-sizing: border-box; }
-    body {
-      margin: 0; min-height: 100vh;
-      background: #080d18; color: #f4f7ff;
-      font-family: Arial, sans-serif;
-    }
-    button, input { font: inherit; }
-    button { cursor: pointer; }
-    .app {
-      max-width: 850px; margin: auto; min-height: 100vh;
-      display: flex; flex-direction: column;
-      border-left: 1px solid #1c2940;
-      border-right: 1px solid #1c2940;
-      background: #0c1424;
-    }
-    header {
-      padding: 18px; background: #101c30;
-      border-bottom: 1px solid #263650;
-      display: flex; align-items: center;
-      justify-content: space-between; gap: 12px;
-    }
-    h1 { margin: 0; font-size: 23px; }
-    .sub { color: #9aacc8; font-size: 13px; margin-top: 5px; }
-    .content { padding: 18px; }
-    .panel {
-      background: #101c30; border: 1px solid #263650;
-      border-radius: 16px; padding: 20px; margin: 18px;
-    }
-    input {
-      width: 100%; padding: 13px; margin: 8px 0;
-      background: #081120; color: white;
-      border: 1px solid #334663; border-radius: 10px;
-      outline: none;
-    }
-    input:focus { border-color: #3988ff; }
-    button {
-      border: 0; border-radius: 10px; padding: 12px 15px;
-      background: #1877f2; color: white; font-weight: bold;
-    }
-    button:disabled { opacity: .55; cursor: wait; }
-    button.secondary { background: #263650; }
-    button.small { padding: 9px 11px; font-size: 13px; }
-    .full { width: 100%; margin-top: 8px; }
-    #chatView { display: none; flex: 1; flex-direction: column; }
-    .roombar {
-      padding: 14px 18px; border-bottom: 1px solid #263650;
-      display: flex; justify-content: space-between;
-      align-items: center; gap: 10px;
-    }
-    #messages {
-      padding: 18px; display: flex; flex-direction: column;
-      gap: 12px; flex: 1; min-height: 300px;
-      max-height: 58vh; overflow-y: auto;
-    }
-    .bubble {
-      max-width: 82%; align-self: flex-start;
-      padding: 11px 13px; border-radius: 14px;
-      background: #192942; overflow-wrap: anywhere;
-      white-space: pre-wrap;
-    }
-    .bubble.mine {
-      align-self: flex-end; background: #1459b8;
-    }
-    .sender { font-size: 12px; color: #a9caff; margin-bottom: 6px; }
-    .bodytext { line-height: 1.45; }
-    .time { color: #c0d2ed; font-size: 10px; margin-top: 6px; }
-    .composer {
-      display: flex; gap: 8px; padding: 14px;
-      background: #101c30; border-top: 1px solid #263650;
-    }
-    .composer input { margin: 0; min-width: 0; }
-    .composer button { flex-shrink: 0; }
-    .hint { color: #9aacc8; font-size: 13px; line-height: 1.5; }
-    #status { color: #b7d2ff; padding: 0 18px 14px; overflow-wrap: anywhere; }
-    #recaptcha { margin: 12px 0; }
-    .hidden { display: none !important; }
-    @media (max-width: 500px) {
-      .panel { margin: 12px; padding: 16px; }
-      header { padding: 15px; }
-      #messages { padding: 12px; }
-      .bubble { max-width: 90%; }
-    }
+    *{box-sizing:border-box}
+    body{margin:0;background:#080d18;color:#f4f7ff;font-family:Arial,sans-serif}
+    button,input{font:inherit}
+    .app{max-width:850px;min-height:100vh;margin:auto;background:#0c1424;display:flex;flex-direction:column}
+    header{padding:20px;background:#101c30;border-bottom:1px solid #263650}
+    h1{margin:0;color:#65a5ff}
+    .sub,.hint{color:#a9b8d0;font-size:13px;line-height:1.5}
+    .panel{margin:18px;padding:20px;background:#101c30;border:1px solid #263650;border-radius:16px}
+    input{width:100%;padding:13px;margin:7px 0;background:#081120;color:white;border:1px solid #334663;border-radius:10px}
+    button{padding:12px 15px;border:0;border-radius:10px;background:#1877f2;color:white;font-weight:bold;cursor:pointer}
+    button:disabled{opacity:.6}
+    .full{width:100%;margin-top:8px}
+    .secondary{background:#263650}
+    #chat{display:none;flex:1;flex-direction:column}
+    .room{padding:15px 18px;display:flex;justify-content:space-between;align-items:center;gap:10px;border-bottom:1px solid #263650}
+    #messages{padding:16px;display:flex;flex-direction:column;gap:10px;overflow-y:auto;min-height:300px;max-height:55vh}
+    .bubble{align-self:flex-start;max-width:85%;padding:11px 13px;background:#192942;border-radius:13px;overflow-wrap:anywhere;white-space:pre-wrap}
+    .mine{align-self:flex-end;background:#1459b8}
+    .sender{font-size:12px;color:#b9d6ff;margin-bottom:5px}
+    .composer{display:flex;gap:8px;padding:14px;background:#101c30;border-top:1px solid #263650}
+    .composer input{min-width:0;margin:0}
+    #status{padding:0 18px;color:#b9d6ff;overflow-wrap:anywhere}
   </style>
 </head>
-
 <body>
-  <main class="app">
-    <header>
-      <div>
-        <h1>🔵 Akosh Chat</h1>
-        <div class="sub">Do‘stlar bilan suhbatlash</div>
-      </div>
-      <span id="onlineState" class="sub">Xavfsiz kirish</span>
-    </header>
+<div class="app">
+  <header>
+    <h1>🔵 Akosh Chat</h1>
+    <div class="sub">Do‘stlar bilan suhbatlash</div>
+  </header>
 
-    <section id="loginView" class="panel">
-      <h2>Hisobga kirish</h2>
-      <p class="hint">Telefon raqamingni xalqaro formatda yoz.</p>
-      <input id="phone" type="tel" placeholder="+998901234567"
-             autocomplete="tel">
-      <div id="recaptcha"></div>
-      <button id="sendCode" class="full">SMS kod yuborish</button>
-      <input id="smsCode" inputmode="numeric" placeholder="Tasdiqlash kodi">
-      <button id="verifyCode" class="full">Kirish</button>
-    </section>
+  <section id="authPanel" class="panel">
+    <h2 id="authTitle">Hisob yaratish</h2>
+    <p class="hint">SMS kerak emas. Email va parol bilan kir.</p>
+    <input id="username" placeholder="Username (masalan, akosh11)" maxlength="24" autocomplete="username">
+    <input id="email" type="email" placeholder="Email manziling" autocomplete="email">
+    <input id="password" type="password" placeholder="Parol (kamida 6 belgi)" autocomplete="new-password">
+    <button id="signup" class="full">Ro‘yxatdan o‘tish</button>
+    <button id="login" class="full secondary">Hisobga kirish</button>
+    <p class="hint">Ro‘yxatdan o‘tish uchun haqiqiy email manzil kerak bo‘lishi mumkin, lekin bu kod email tasdiqlashni talab qilmaydi.</p>
+  </section>
 
-    <section id="chatView">
-      <div class="roombar">
-        <div>
-          <strong>🌐 Umumiy xona</strong>
-          <div class="sub" id="myAccount"></div>
-        </div>
-        <button id="logout" class="secondary small">Chiqish</button>
-      </div>
+  <section id="chat">
+    <div class="room">
+      <div><strong>🌐 Umumiy xona</strong><div id="who" class="sub"></div></div>
+      <button id="logout" class="secondary">Chiqish</button>
+    </div>
+    <p class="hint" style="padding:0 16px">Bu umumiy xona: yuborilgan xabarlarni boshqa kirgan foydalanuvchilar ham ko‘radi.</p>
+    <div id="messages" aria-live="polite"></div>
+    <div class="composer">
+      <input id="messageInput" placeholder="Xabaringni yoz..." maxlength="2000">
+      <button id="send">Yuborish</button>
+    </div>
+  </section>
+  <p id="status" role="status"></p>
+</div>
 
-      <div class="content">
-        <p class="hint">
-          Bu sinov xonasi. Bu yerga yuborilgan xabarlarni kirgan
-          boshqa foydalanuvchilar ham ko‘rishi mumkin.
-        </p>
-      </div>
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+import {
+  getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,
+  onAuthStateChanged,signOut
+} from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+import {
+  getFirestore,doc,setDoc,collection,addDoc,query,orderBy,limit,
+  onSnapshot,serverTimestamp
+} from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 
-      <div id="messages" aria-live="polite">
-        <p class="hint">Xabarlar yuklanmoqda...</p>
-      </div>
+const firebaseConfig={
+  apiKey:"AIzaSyCSdBqAa2QYe7bGQ7SeC-BoSmbx6PwUku8",
+  authDomain:"akoshgram-b6bd4.firebaseapp.com",
+  projectId:"akoshgram-b6bd4",
+  storageBucket:"akoshgram-b6bd4.firebasestorage.app",
+  messagingSenderId:"374045331367",
+  appId:"1:374045331367:web:e2a1ea9b7370702f453082"
+};
 
-      <div class="composer">
-        <input id="messageInput" maxlength="2000"
-               placeholder="Xabaringni yoz..."
-               autocomplete="off">
-        <button id="sendMessage">Yuborish</button>
-      </div>
-    </section>
+const app=initializeApp(firebaseConfig);
+const auth=getAuth(app);
+const db=getFirestore(app);
+const $=id=>document.getElementById(id);
+const status=t=>$("status").textContent=t;
+let stopMessages=null;
+let busy=false;
 
-    <p id="status" role="status"></p>
-  </main>
+function cleanUsername(value){
+  return value.trim().replace(/^@/,"").toLowerCase();
+}
 
-  <script type="module">
-    import {
-      initializeApp
-    } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+$("signup").onclick=async()=>{
+  if(busy)return;
+  const username=cleanUsername($("username").value);
+  const email=$("email").value.trim();
+  const password=$("password").value;
 
-    import {
-      getAuth, RecaptchaVerifier, signInWithPhoneNumber,
-      onAuthStateChanged, signOut
-    } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+  if(!/^[a-z0-9_]{3,24}$/.test(username)){
+    status("Username 3–24 ta belgi bo‘lsin: faqat harf, raqam va _.");
+    return;
+  }
+  if(password.length<6){
+    status("Parol kamida 6 ta belgidan iborat bo‘lsin.");
+    return;
+  }
 
-    import {
-      getFirestore, collection, addDoc, query, orderBy,
-      limit, onSnapshot, serverTimestamp
-    } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyCSdBqAa2QYe7bGQ7SeC-BoSmbx6PwUku8",
-      authDomain: "akoshgram-b6bd4.firebaseapp.com",
-      projectId: "akoshgram-b6bd4",
-      storageBucket: "akoshgram-b6bd4.firebasestorage.app",
-      messagingSenderId: "374045331367",
-      appId: "1:374045331367:web:e2a1ea9b7370702f453082"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-
-    const $ = id => document.getElementById(id);
-    const status = text => $("status").textContent = text;
-
-    let confirmation = null;
-    let verifier = null;
-    let stopMessages = null;
-    let sending = false;
-
-    try {
-      verifier = new RecaptchaVerifier(auth, "recaptcha", {
-        size: "normal",
-        callback: () => status("Robot emasliging tekshirildi.")
-      });
-      await verifier.render();
-    } catch (error) {
-      status("Tekshiruvni yuklashda xato: " + error.message);
-    }
-
-    $("sendCode").onclick = async () => {
-      const phone = $("phone").value.trim();
-
-      if (!phone.startsWith("+")) {
-        status("Raqamni +998901234567 formatida kiriting.");
-        return;
-      }
-
-      try {
-        $("sendCode").disabled = true;
-        confirmation = await signInWithPhoneNumber(auth, phone, verifier);
-        status("SMS yuborildi. Kodni kiriting.");
-      } catch (error) {
-        status("SMS xatosi: " + error.message);
-      } finally {
-        $("sendCode").disabled = false;
-      }
-    };
-
-    $("verifyCode").onclick = async () => {
-      if (!confirmation) {
-        status("Avval SMS kod yuboring.");
-        return;
-      }
-
-      try {
-        await confirmation.confirm($("smsCode").value.trim());
-        status("Kirish muvaffaqiyatli!");
-      } catch (error) {
-        status("Kod tasdiqlanmadi: " + error.message);
-      }
-    };
-
-    function showMessages(user) {
-      if (stopMessages) {
-        stopMessages();
-        stopMessages = null;
-      }
-
-      const list = $("messages");
-      list.replaceChildren();
-
-      const messagesQuery = query(
-        collection(db, "rooms", "lobby", "messages"),
-        orderBy("createdAt", "asc"),
-        limit(100)
-      );
-
-      stopMessages = onSnapshot(messagesQuery, snapshot => {
-        list.replaceChildren();
-
-        if (snapshot.empty) {
-          const empty = document.createElement("p");
-          empty.className = "hint";
-          empty.textContent = "Hali xabar yo‘q. Birinchi bo‘lib yoz!";
-          list.appendChild(empty);
-          return;
-        }
-
-        snapshot.forEach(docSnap => {
-          const data = docSnap.data();
-          const bubble = document.createElement("article");
-          bubble.className = "bubble" +
-            (data.senderId === user.uid ? " mine" : "");
-
-          const sender = document.createElement("div");
-          sender.className = "sender";
-          sender.textContent = data.senderId === user.uid
-            ? "Siz"
-            : (data.senderPhone || "Akosh Chat foydalanuvchisi");
-
-          const body = document.createElement("div");
-          body.className = "bodytext";
-          body.textContent = data.text || "";
-
-          const time = document.createElement("div");
-          time.className = "time";
-          const date = data.createdAt?.toDate?.();
-          time.textContent = date
-            ? date.toLocaleTimeString("uz-UZ", {
-                hour: "2-digit", minute: "2-digit"
-              })
-            : "Hozir";
-
-          bubble.append(sender, body, time);
-          list.appendChild(bubble);
-        });
-
-        list.scrollTop = list.scrollHeight;
-      }, error => {
-        status("Xabarlarni yuklashda xato: " + error.message);
-      });
-    }
-
-    async function sendMessage() {
-      const user = auth.currentUser;
-      const text = $("messageInput").value.trim();
-
-      if (!user || !text || sending) return;
-
-      try {
-        sending = true;
-        $("sendMessage").disabled = true;
-
-        await addDoc(collection(db, "rooms", "lobby", "messages"), {
-          text,
-          senderId: user.uid,
-          senderPhone: user.phoneNumber || "",
-          createdAt: serverTimestamp()
-        });
-
-        $("messageInput").value = "";
-        status("");
-      } catch (error) {
-        status("Xabar yuborilmadi: " + error.message);
-      } finally {
-        sending = false;
-        $("sendMessage").disabled = false;
-      }
-    }
-
-    $("sendMessage").onclick = sendMessage;
-    $("messageInput").addEventListener("keydown", event => {
-      if (event.key === "Enter") sendMessage();
+  busy=true;
+  $("signup").disabled=true;
+  try{
+    const credential=await createUserWithEmailAndPassword(auth,email,password);
+    await setDoc(doc(db,"users",credential.user.uid),{
+      username,
+      createdAt:serverTimestamp()
     });
+    status("Hisob yaratildi!");
+  }catch(e){
+    status("Ro‘yxatdan o‘tish xatosi: "+e.message);
+  }finally{
+    busy=false;
+    $("signup").disabled=false;
+  }
+};
 
-    $("logout").onclick = async () => {
-      try {
-        await signOut(auth);
-        status("Hisobdan chiqdingiz.");
-      } catch (error) {
-        status("Chiqishda xato: " + error.message);
-      }
-    };
+$("login").onclick=async()=>{
+  try{
+    await signInWithEmailAndPassword(
+      auth,$("email").value.trim(),$("password").value
+    );
+    status("Kirdingiz!");
+  }catch(e){
+    status("Kirish xatosi: "+e.message);
+  }
+};
 
-    onAuthStateChanged(auth, user => {
-      $("loginView").style.display = user ? "none" : "block";
-      $("chatView").style.display = user ? "flex" : "none";
-      $("onlineState").textContent = user ? "Chatga ulangan" : "Kirish kerak";
+function listenMessages(user){
+  if(stopMessages)stopMessages();
 
-      if (user) {
-        $("myAccount").textContent = user.phoneNumber || "";
-        showMessages(user);
-      } else {
-        if (stopMessages) stopMessages();
-        stopMessages = null;
-        $("messages").replaceChildren();
-      }
+  const q=query(
+    collection(db,"rooms","lobby","messages"),
+    orderBy("createdAt","asc"),
+    limit(100)
+  );
+
+  stopMessages=onSnapshot(q,async snapshot=>{
+    const list=$("messages");
+    list.replaceChildren();
+
+    if(snapshot.empty){
+      const p=document.createElement("p");
+      p.className="hint";
+      p.textContent="Hali xabar yo‘q. Birinchi bo‘lib yoz!";
+      list.append(p);
+      return;
+    }
+
+    const ids=[...new Set(snapshot.docs.map(d=>d.data().senderId))];
+    const names={};
+    await Promise.all(ids.map(async uid=>{
+      try{
+        const {getDoc}=await import("https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js");
+        const profile=await getDoc(doc(db,"users",uid));
+        names[uid]=profile.exists()?profile.data().username:"foydalanuvchi";
+      }catch{names[uid]="foydalanuvchi";}
+    }));
+
+    snapshot.forEach(item=>{
+      const data=item.data();
+      const bubble=document.createElement("div");
+      bubble.className="bubble"+(data.senderId===user.uid?" mine":"");
+      const sender=document.createElement("div");
+      sender.className="sender";
+      sender.textContent=data.senderId===user.uid?"Siz":"@"+(names[data.senderId]||"foydalanuvchi");
+      const text=document.createElement("div");
+      text.textContent=data.text||"";
+      bubble.append(sender,text);
+      list.append(bubble);
     });
-  </script>
+    list.scrollTop=list.scrollHeight;
+  },e=>status("Xabarlarni o‘qib bo‘lmadi: "+e.message));
+}
+
+$("send").onclick=async()=>{
+  const user=auth.currentUser;
+  const text=$("messageInput").value.trim();
+  if(!user||!text||busy)return;
+
+  busy=true;
+  $("send").disabled=true;
+  try{
+    await addDoc(collection(db,"rooms","lobby","messages"),{
+      text,
+      senderId:user.uid,
+      createdAt:serverTimestamp()
+    });
+    $("messageInput").value="";
+    status("");
+  }catch(e){
+    status("Xabar yuborilmadi: "+e.message);
+  }finally{
+    busy=false;
+    $("send").disabled=false;
+  }
+};
+
+$("messageInput").addEventListener("keydown",e=>{
+  if(e.key==="Enter")$("send").click();
+});
+
+$("logout").onclick=()=>signOut(auth);
+
+onAuthStateChanged(auth,user=>{
+  $("authPanel").style.display=user?"none":"block";
+  $("chat").style.display=user?"flex":"none";
+  if(stopMessages){stopMessages();stopMessages=null;}
+
+  if(user){
+    $("who").textContent=user.email||"";
+    listenMessages(user);
+  }else{
+    $("messages").replaceChildren();
+  }
+});
+</script>
 </body>
 </html>
