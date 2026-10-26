@@ -3,70 +3,112 @@
 <html lang="uz">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Akosh Chat</title>
   <style>
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #080d18;
-      color: white;
-      min-height: 100vh;
-      display: grid;
-      place-items: center;
-    }
-    .app {
-      width: min(440px, 92%);
-      padding: 32px 24px;
-      border: 1px solid #24334e;
-      border-radius: 24px;
-      background: #101a2c;
-      text-align: center;
-      box-shadow: 0 20px 70px #0007;
-    }
-    .logo {
-      width: 76px;
-      height: 76px;
-      display: grid;
-      place-items: center;
-      margin: 0 auto 18px;
-      border-radius: 24px;
-      background: linear-gradient(135deg, #1686ff, #1648d8);
-      font-size: 34px;
-      font-weight: bold;
-    }
-    h1 { margin: 0 0 10px; }
-    p { color: #a9b8d0; line-height: 1.6; }
-    button {
-      width: 100%;
-      padding: 14px;
-      margin-top: 14px;
-      border: 0;
-      border-radius: 12px;
-      background: #1877f2;
-      color: white;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    button:hover { background: #0864df; }
-    .status { font-size: 12px; color: #7f91ad; }
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh;display:grid;place-items:center;background:#080d18;color:white;font-family:Arial,sans-serif}
+    .card{width:min(420px,92%);padding:28px;background:#101a2c;border:1px solid #24334e;border-radius:22px}
+    h1{text-align:center}
+    p{color:#a9b8d0;line-height:1.5}
+    input,button{width:100%;padding:14px;margin-top:12px;border-radius:10px;font-size:16px}
+    input{background:#091222;border:1px solid #30415f;color:white}
+    button{background:#1877f2;color:white;border:0;font-weight:bold;cursor:pointer}
+    #message{overflow-wrap:anywhere;font-size:14px}
+    #chat{display:none}
   </style>
 </head>
 <body>
-  <main class="app">
-    <div class="logo">A</div>
-    <h1>Akosh Chat</h1>
-    <p>Do‘stlaring bilan suhbatlash. Guruhlar yarat va xabar almash.</p>
-    <button id="start">Chatni boshlash</button>
-    <p class="status" id="status">PRO versiya · Dastlabki sahifa</p>
+  <main class="card">
+    <h1>🔵 Akosh Chat</h1>
+    <p>Do‘stlaring bilan suhbatlashish uchun telefon raqaming orqali kir.</p>
+
+    <section id="login">
+      <input id="phone" type="tel" placeholder="+998901234567">
+      <div id="recaptcha"></div>
+      <button id="send">SMS kod yuborish</button>
+      <input id="sms" placeholder="SMS kod" inputmode="numeric">
+      <button id="verify">Kodni tasdiqlash</button>
+    </section>
+
+    <section id="chat">
+      <h2>Xush kelibsan!</h2>
+      <p id="account"></p>
+      <p>Telefon orqali kirish muvaffaqiyatli. Chat funksiyalarini keyingi bosqichda ulaymiz.</p>
+      <button id="logout">Chiqish</button>
+    </section>
+    <p id="message" role="status"></p>
   </main>
-  <script>
-    document.getElementById("start").addEventListener("click", () => {
-      document.getElementById("status").textContent =
-        "Keyingi bosqichda telefon orqali kirish ulanadi.";
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+    import {
+      getAuth, RecaptchaVerifier, signInWithPhoneNumber,
+      onAuthStateChanged, signOut
+    } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+
+    // Firebase Console → Project settings → Your apps → Config
+    // Quyidagi qiymatlarni o'zingdagi Config qiymatlari bilan almashtir.
+    const firebaseConfig = {
+      apiKey: "BU_YERGA_API_KEY",
+      authDomain: "BU_YERGA_AUTH_DOMAIN",
+      projectId: "akoshgram-b6bd4",
+      storageBucket: "BU_YERGA_STORAGE_BUCKET",
+      messagingSenderId: "BU_YERGA_SENDER_ID",
+      appId: "BU_YERGA_APP_ID"
+    };
+
+    const message = document.getElementById("message");
+    const showMessage = (text) => message.textContent = text;
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    let confirmation = null;
+    let verifier = null;
+
+    try {
+      verifier = new RecaptchaVerifier(auth, "recaptcha", {
+        size: "normal",
+        callback: () => showMessage("Tekshiruv muvaffaqiyatli.")
+      });
+      await verifier.render();
+    } catch (error) {
+      showMessage("reCAPTCHA xatosi: " + error.message);
+    }
+
+    document.getElementById("send").onclick = async () => {
+      const phone = document.getElementById("phone").value.trim();
+      if (!phone.startsWith("+")) {
+        showMessage("Raqamni xalqaro formatda kiriting. Masalan: +998901234567");
+        return;
+      }
+      try {
+        confirmation = await signInWithPhoneNumber(auth, phone, verifier);
+        showMessage("SMS yuborildi. Kodni kiriting.");
+      } catch (error) {
+        showMessage("SMS yuborilmadi: " + error.message);
+      }
+    };
+
+    document.getElementById("verify").onclick = async () => {
+      if (!confirmation) {
+        showMessage("Avval SMS kod yuborish tugmasini bosing.");
+        return;
+      }
+      try {
+        await confirmation.confirm(document.getElementById("sms").value.trim());
+        showMessage("Kirish muvaffaqiyatli!");
+      } catch (error) {
+        showMessage("Kod xato yoki muddati tugagan: " + error.message);
+      }
+    };
+
+    onAuthStateChanged(auth, user => {
+      document.getElementById("login").style.display = user ? "none" : "block";
+      document.getElementById("chat").style.display = user ? "block" : "none";
+      document.getElementById("account").textContent = user?.phoneNumber || "";
     });
+
+    document.getElementById("logout").onclick = () => signOut(auth);
   </script>
 </body>
 </html>
