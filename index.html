@@ -2,66 +2,92 @@
 <!DOCTYPE html>
 <html lang="uz">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#080d18">
-  <title>Akosh Chat</title>
-  <style>
-    *{box-sizing:border-box}
-    body{margin:0;background:#080d18;color:#f4f7ff;font-family:Arial,sans-serif}
-    button,input{font:inherit}
-    .app{max-width:850px;min-height:100vh;margin:auto;background:#0c1424;display:flex;flex-direction:column}
-    header{padding:20px;background:#101c30;border-bottom:1px solid #263650}
-    h1{margin:0;color:#65a5ff}
-    .sub,.hint{color:#a9b8d0;font-size:13px;line-height:1.5}
-    .panel{margin:18px;padding:20px;background:#101c30;border:1px solid #263650;border-radius:16px}
-    input{width:100%;padding:13px;margin:7px 0;background:#081120;color:white;border:1px solid #334663;border-radius:10px}
-    button{padding:12px 15px;border:0;border-radius:10px;background:#1877f2;color:white;font-weight:bold;cursor:pointer}
-    button:disabled{opacity:.6}
-    .full{width:100%;margin-top:8px}
-    .secondary{background:#263650}
-    #chat{display:none;flex:1;flex-direction:column}
-    .room{padding:15px 18px;display:flex;justify-content:space-between;align-items:center;gap:10px;border-bottom:1px solid #263650}
-    #messages{padding:16px;display:flex;flex-direction:column;gap:10px;overflow-y:auto;min-height:300px;max-height:55vh}
-    .bubble{align-self:flex-start;max-width:85%;padding:11px 13px;background:#192942;border-radius:13px;overflow-wrap:anywhere;white-space:pre-wrap}
-    .mine{align-self:flex-end;background:#1459b8}
-    .sender{font-size:12px;color:#b9d6ff;margin-bottom:5px}
-    .composer{display:flex;gap:8px;padding:14px;background:#101c30;border-top:1px solid #263650}
-    .composer input{min-width:0;margin:0}
-    #status{padding:0 18px;color:#b9d6ff;overflow-wrap:anywhere}
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#080d18">
+<title>Akosh Chat</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#080d18;color:#f4f7ff;font-family:Arial,sans-serif}
+button,input{font:inherit}
+button{border:0;border-radius:10px;background:#1877f2;color:white;padding:12px;cursor:pointer;font-weight:bold}
+input{width:100%;padding:13px;background:#091222;border:1px solid #30415f;border-radius:10px;color:white;margin:6px 0}
+.app{max-width:1050px;margin:auto;min-height:100vh;display:flex;flex-direction:column}
+header{padding:18px;background:#101a2c;border-bottom:1px solid #263650}
+h1{margin:0;color:#65a5ff}
+.muted{color:#a9b8d0;font-size:13px;line-height:1.5}
+#auth{margin:20px auto;width:min(430px,92%);padding:22px;background:#101a2c;border:1px solid #263650;border-radius:18px}
+#main{display:none;flex:1;min-height:0}
+.layout{display:grid;grid-template-columns:300px minmax(0,1fr);min-height:650px}
+.sidebar{padding:16px;border-right:1px solid #263650}
+.section-title{font-weight:bold;margin:12px 0}
+.person{width:100%;display:block;text-align:left;margin:6px 0;background:#14223a;border:1px solid #263650;padding:12px}
+.person small{display:block;color:#a9b8d0;margin-top:5px;font-weight:normal}
+#conversation{display:flex;flex-direction:column;min-width:0}
+.chathead{padding:16px;border-bottom:1px solid #263650}
+#messages{flex:1;min-height:350px;max-height:60vh;overflow:auto;padding:16px;display:flex;flex-direction:column;gap:10px}
+.bubble{max-width:85%;align-self:flex-start;background:#192942;padding:11px 13px;border-radius:14px;overflow-wrap:anywhere;white-space:pre-wrap}
+.bubble.mine{align-self:flex-end;background:#1459b8}
+.sender{font-size:12px;color:#c1d9ff;margin-bottom:5px}
+.composer{display:flex;gap:8px;padding:14px;border-top:1px solid #263650;background:#101a2c}
+.composer input{min-width:0;margin:0}
+#status{padding:12px 18px;color:#b9d6ff;overflow-wrap:anywhere}
+.hidden{display:none!important}
+@media(max-width:650px){
+ .layout{grid-template-columns:1fr;min-height:0}
+ .sidebar{border-right:0;border-bottom:1px solid #263650}
+ #messages{min-height:260px}
+}
+</style>
 </head>
 <body>
 <div class="app">
-  <header>
-    <h1>🔵 Akosh Chat</h1>
-    <div class="sub">Do‘stlar bilan suhbatlash</div>
-  </header>
+<header>
+  <h1>🔵 Akosh Chat</h1>
+  <div class="muted">Do‘stlaring bilan shaxsiy suhbat</div>
+</header>
 
-  <section id="authPanel" class="panel">
-    <h2 id="authTitle">Hisob yaratish</h2>
-    <p class="hint">SMS kerak emas. Email va parol bilan kir.</p>
-    <input id="username" placeholder="Username (masalan, akosh11)" maxlength="24" autocomplete="username">
-    <input id="email" type="email" placeholder="Email manziling" autocomplete="email">
-    <input id="password" type="password" placeholder="Parol (kamida 6 belgi)" autocomplete="new-password">
-    <button id="signup" class="full">Ro‘yxatdan o‘tish</button>
-    <button id="login" class="full secondary">Hisobga kirish</button>
-    <p class="hint">Ro‘yxatdan o‘tish uchun haqiqiy email manzil kerak bo‘lishi mumkin, lekin bu kod email tasdiqlashni talab qilmaydi.</p>
-  </section>
+<section id="auth">
+  <h2 id="authTitle">Hisob yaratish</h2>
+  <p class="muted">SMS kerak emas. Username, email va parol bilan kir.</p>
+  <input id="username" placeholder="Username: akosh11" maxlength="24">
+  <input id="email" type="email" placeholder="Email" autocomplete="email">
+  <input id="password" type="password" placeholder="Parol (kamida 6 belgi)" autocomplete="current-password">
+  <button id="signup" style="width:100%;margin-top:8px">Ro‘yxatdan o‘tish</button>
+  <button id="login" style="width:100%;margin-top:8px;background:#263650">Hisobga kirish</button>
+</section>
 
-  <section id="chat">
-    <div class="room">
-      <div><strong>🌐 Umumiy xona</strong><div id="who" class="sub"></div></div>
-      <button id="logout" class="secondary">Chiqish</button>
+<section id="main">
+<div class="layout">
+  <aside class="sidebar">
+    <div id="myName" class="section-title"></div>
+    <button id="logout" style="width:100%;background:#263650">Chiqish</button>
+
+    <div class="section-title">🔍 Do‘st qidirish</div>
+    <input id="search" placeholder="Username yoz: akosh11">
+    <button id="searchBtn" style="width:100%">Qidirish</button>
+    <div id="searchResults"></div>
+
+    <div class="section-title">💬 Shaxsiy chatlar</div>
+    <div id="chatList" class="muted">Chatlar yuklanmoqda...</div>
+  </aside>
+
+  <section id="conversation">
+    <div class="chathead">
+      <strong id="chatTitle">Suhbatni tanlang</strong>
+      <div id="chatHint" class="muted">Do‘stni username orqali qidiring.</div>
     </div>
-    <p class="hint" style="padding:0 16px">Bu umumiy xona: yuborilgan xabarlarni boshqa kirgan foydalanuvchilar ham ko‘radi.</p>
-    <div id="messages" aria-live="polite"></div>
+    <div id="messages">
+      <p class="muted">Shaxsiy suhbatni boshlash uchun chapdan do‘st qidiring.</p>
+    </div>
     <div class="composer">
-      <input id="messageInput" placeholder="Xabaringni yoz..." maxlength="2000">
-      <button id="send">Yuborish</button>
+      <input id="messageInput" maxlength="2000" placeholder="Xabar yoz..." disabled>
+      <button id="send" disabled>Yuborish</button>
     </div>
   </section>
-  <p id="status" role="status"></p>
+</div>
+</section>
+<p id="status" role="status"></p>
 </div>
 
 <script type="module">
@@ -71,8 +97,8 @@ import {
   onAuthStateChanged,signOut
 } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
 import {
-  getFirestore,doc,setDoc,collection,addDoc,query,orderBy,limit,
-  onSnapshot,serverTimestamp
+  getFirestore,doc,getDoc,setDoc,runTransaction,collection,addDoc,
+  query,where,onSnapshot,orderBy,limit,serverTimestamp
 } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 
 const firebaseConfig={
@@ -83,149 +109,211 @@ const firebaseConfig={
   messagingSenderId:"374045331367",
   appId:"1:374045331367:web:e2a1ea9b7370702f453082"
 };
-
-const app=initializeApp(firebaseConfig);
-const auth=getAuth(app);
-const db=getFirestore(app);
+const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app);
 const $=id=>document.getElementById(id);
-const status=t=>$("status").textContent=t;
-let stopMessages=null;
-let busy=false;
+const say=t=>$("status").textContent=t;
+const uname=v=>v.trim().replace(/^@/,"").toLowerCase();
+let me=null,myUsername="",activeChat=null,activeFriend=null;
+let stopMessages=null,stopChats=null,stopProfiles=null,busy=false;
 
-function cleanUsername(value){
-  return value.trim().replace(/^@/,"").toLowerCase();
+function validName(v){return /^[a-z0-9_]{3,24}$/.test(v)}
+
+async function createProfile(user, requestedName){
+  const name=uname(requestedName);
+  if(!validName(name))throw Error("Username 3–24 belgi bo‘lsin: harf, raqam va _.");
+
+  await runTransaction(db,async tx=>{
+    const userRef=doc(db,"users",user.uid);
+    const nameRef=doc(db,"usernames",name);
+    const [profile,nameDoc]=await Promise.all([tx.get(userRef),tx.get(nameRef)]);
+
+    if(profile.exists()){
+      const existing=profile.data().username;
+      if(existing){
+        myUsername=existing;
+        return;
+      }
+    }
+    if(nameDoc.exists() && nameDoc.data().uid!==user.uid){
+      throw Error("Bu username band. Boshqasini tanlang.");
+    }
+    tx.set(userRef,{username:name,createdAt:serverTimestamp()});
+    tx.set(nameRef,{uid:user.uid,username:name});
+    myUsername=name;
+  });
+}
+
+async function loadProfile(user){
+  const snap=await getDoc(doc(db,"users",user.uid));
+  if(snap.exists() && snap.data().username){
+    myUsername=snap.data().username;
+    return;
+  }
+  const name=uname($("username").value);
+  if(!validName(name)){
+    say("Bu hisobda username yo‘q. Username maydoniga yangi username yozib, ro‘yxatdan o‘tish tugmasini bosmang — avval yordam so‘rang.");
+    throw Error("Ushbu eski hisob uchun username sozlanmagan.");
+  }
+  await createProfile(user,name);
 }
 
 $("signup").onclick=async()=>{
-  if(busy)return;
-  const username=cleanUsername($("username").value);
-  const email=$("email").value.trim();
-  const password=$("password").value;
-
-  if(!/^[a-z0-9_]{3,24}$/.test(username)){
-    status("Username 3–24 ta belgi bo‘lsin: faqat harf, raqam va _.");
-    return;
-  }
-  if(password.length<6){
-    status("Parol kamida 6 ta belgidan iborat bo‘lsin.");
-    return;
-  }
-
-  busy=true;
-  $("signup").disabled=true;
-  try{
-    const credential=await createUserWithEmailAndPassword(auth,email,password);
-    await setDoc(doc(db,"users",credential.user.uid),{
-      username,
-      createdAt:serverTimestamp()
-    });
-    status("Hisob yaratildi!");
-  }catch(e){
-    status("Ro‘yxatdan o‘tish xatosi: "+e.message);
-  }finally{
-    busy=false;
-    $("signup").disabled=false;
-  }
+ if(busy)return;
+ const name=uname($("username").value),email=$("email").value.trim(),password=$("password").value;
+ if(!validName(name)){say("Username 3–24 belgi bo‘lsin: harf, raqam va _.");return}
+ if(password.length<6){say("Parol kamida 6 belgi bo‘lsin.");return}
+ busy=true;
+ try{
+   const cred=await createUserWithEmailAndPassword(auth,email,password);
+   await createProfile(cred.user,name);
+   say("Hisob yaratildi!");
+ }catch(e){
+   say("Xato: "+e.message);
+ }finally{busy=false}
 };
 
 $("login").onclick=async()=>{
-  try{
-    await signInWithEmailAndPassword(
-      auth,$("email").value.trim(),$("password").value
-    );
-    status("Kirdingiz!");
-  }catch(e){
-    status("Kirish xatosi: "+e.message);
-  }
+ try{
+   await signInWithEmailAndPassword(auth,$("email").value.trim(),$("password").value);
+ }catch(e){say("Kirish xatosi: "+e.message)}
 };
 
-function listenMessages(user){
-  if(stopMessages)stopMessages();
-
-  const q=query(
-    collection(db,"rooms","lobby","messages"),
-    orderBy("createdAt","asc"),
-    limit(100)
-  );
-
-  stopMessages=onSnapshot(q,async snapshot=>{
-    const list=$("messages");
-    list.replaceChildren();
-
-    if(snapshot.empty){
-      const p=document.createElement("p");
-      p.className="hint";
-      p.textContent="Hali xabar yo‘q. Birinchi bo‘lib yoz!";
-      list.append(p);
-      return;
-    }
-
-    const ids=[...new Set(snapshot.docs.map(d=>d.data().senderId))];
-    const names={};
-    await Promise.all(ids.map(async uid=>{
-      try{
-        const {getDoc}=await import("https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js");
-        const profile=await getDoc(doc(db,"users",uid));
-        names[uid]=profile.exists()?profile.data().username:"foydalanuvchi";
-      }catch{names[uid]="foydalanuvchi";}
-    }));
-
-    snapshot.forEach(item=>{
-      const data=item.data();
-      const bubble=document.createElement("div");
-      bubble.className="bubble"+(data.senderId===user.uid?" mine":"");
-      const sender=document.createElement("div");
-      sender.className="sender";
-      sender.textContent=data.senderId===user.uid?"Siz":"@"+(names[data.senderId]||"foydalanuvchi");
-      const text=document.createElement("div");
-      text.textContent=data.text||"";
-      bubble.append(sender,text);
-      list.append(bubble);
-    });
-    list.scrollTop=list.scrollHeight;
-  },e=>status("Xabarlarni o‘qib bo‘lmadi: "+e.message));
+function stopListeners(){
+ if(stopMessages)stopMessages();
+ if(stopChats)stopChats();
+ if(stopProfiles)stopProfiles();
+ stopMessages=stopChats=stopProfiles=null;
 }
 
-$("send").onclick=async()=>{
-  const user=auth.currentUser;
-  const text=$("messageInput").value.trim();
-  if(!user||!text||busy)return;
+async function openChat(friendUid,friendName){
+ if(!me || friendUid===me.uid){say("O‘zing bilan chat ocholmaysan.");return}
+ try{
+  const ids=[me.uid,friendUid].sort();
+  const chatId=ids.join("__");
+  const chatRef=doc(db,"chats",chatId);
+  const snap=await getDoc(chatRef);
 
-  busy=true;
-  $("send").disabled=true;
-  try{
-    await addDoc(collection(db,"rooms","lobby","messages"),{
-      text,
-      senderId:user.uid,
+  if(!snap.exists()){
+    await setDoc(chatRef,{
+      members:ids,
+      createdBy:me.uid,
       createdAt:serverTimestamp()
     });
-    $("messageInput").value="";
-    status("");
-  }catch(e){
-    status("Xabar yuborilmadi: "+e.message);
-  }finally{
-    busy=false;
-    $("send").disabled=false;
+  }else if(!snap.data().members.includes(me.uid) ||
+           !snap.data().members.includes(friendUid)){
+    throw Error("Chat a’zolari tekshiruvdan o‘tmadi.");
   }
+
+  activeChat=chatId;
+  activeFriend={uid:friendUid,username:friendName};
+  $("chatTitle").textContent="@"+friendName;
+  $("chatHint").textContent="Shaxsiy chat";
+  $("messageInput").disabled=false;
+  $("send").disabled=false;
+
+  if(stopMessages)stopMessages();
+  $("messages").replaceChildren();
+  const q=query(collection(db,"chats",chatId,"messages"),orderBy("createdAt","asc"),limit(200));
+
+  stopMessages=onSnapshot(q,s=>{
+    const list=$("messages");list.replaceChildren();
+    s.forEach(item=>{
+      const d=item.data(),bubble=document.createElement("div");
+      bubble.className="bubble"+(d.senderId===me.uid?" mine":"");
+      const sender=document.createElement("div");
+      sender.className="sender";
+      sender.textContent=d.senderId===me.uid?"Siz":"@"+friendName;
+      const body=document.createElement("div");
+      body.textContent=d.text||"";
+      bubble.append(sender,body);list.append(bubble);
+    });
+    list.scrollTop=list.scrollHeight;
+  },e=>say("Xabar xatosi: "+e.message));
+ }catch(e){say("Chat ochilmadi: "+e.message)}
+}
+
+$("searchBtn").onclick=async()=>{
+ if(!me)return;
+ const name=uname($("search").value),results=$("searchResults");
+ results.replaceChildren();
+ if(!validName(name)){say("To‘liq username kiriting.");return}
+ try{
+  const s=await getDoc(doc(db,"usernames",name));
+  if(!s.exists()){say("Bunday username topilmadi.");return}
+  const data=s.data();
+  if(data.uid===me.uid){say("Bu sening username’ing.");return}
+  const btn=document.createElement("button");
+  btn.className="person";
+  btn.textContent="@"+data.username;
+  const small=document.createElement("small");
+  small.textContent="Shaxsiy xabar yozish";
+  btn.append(small);
+  btn.onclick=()=>openChat(data.uid,data.username);
+  results.append(btn);
+  say("Foydalanuvchi topildi.");
+ }catch(e){say("Qidirish xatosi: "+e.message)}
 };
 
-$("messageInput").addEventListener("keydown",e=>{
-  if(e.key==="Enter")$("send").click();
+$("search").addEventListener("keydown",e=>{
+ if(e.key==="Enter")$("searchBtn").click();
 });
 
+$("send").onclick=async()=>{
+ const text=$("messageInput").value.trim();
+ if(!me||!activeChat||!text||busy)return;
+ busy=true;$("send").disabled=true;
+ try{
+  await addDoc(collection(db,"chats",activeChat,"messages"),{
+    text,senderId:me.uid,createdAt:serverTimestamp()
+  });
+  $("messageInput").value="";
+  say("");
+ }catch(e){say("Xabar yuborilmadi: "+e.message)}
+ finally{busy=false;$("send").disabled=false}
+};
+$("messageInput").addEventListener("keydown",e=>{
+ if(e.key==="Enter")$("send").click();
+});
 $("logout").onclick=()=>signOut(auth);
 
-onAuthStateChanged(auth,user=>{
-  $("authPanel").style.display=user?"none":"block";
-  $("chat").style.display=user?"flex":"none";
-  if(stopMessages){stopMessages();stopMessages=null;}
+onAuthStateChanged(auth,async user=>{
+ stopListeners();me=user;activeChat=null;activeFriend=null;
+ $("auth").style.display=user?"none":"block";
+ $("main").style.display=user?"block":"none";
+ $("messageInput").disabled=true;$("send").disabled=true;
+ $("messages").replaceChildren();
+ $("chatList").textContent="";
 
-  if(user){
-    $("who").textContent=user.email||"";
-    listenMessages(user);
-  }else{
-    $("messages").replaceChildren();
-  }
+ if(!user)return;
+ try{
+  await loadProfile(user);
+  $("myName").textContent="@"+myUsername;
+
+  stopChats=onSnapshot(
+    query(collection(db,"chats"),where("members","array-contains",user.uid)),
+    async snap=>{
+      const list=$("chatList");list.replaceChildren();
+      if(snap.empty){
+        list.textContent="Hali shaxsiy chat yo‘q. Username qidirib boshlang.";
+        return;
+      }
+      for(const item of snap.docs){
+        const data=item.data();
+        const friendUid=(data.members||[]).find(id=>id!==user.uid);
+        if(!friendUid)continue;
+        try{
+          const profile=await getDoc(doc(db,"users",friendUid));
+          const friendName=profile.exists()?profile.data().username:"foydalanuvchi";
+          const btn=document.createElement("button");
+          btn.className="person";
+          btn.textContent="@"+friendName;
+          btn.onclick=()=>openChat(friendUid,friendName);
+          list.append(btn);
+        }catch{}
+      }
+    },e=>say("Chatlar yuklanmadi: "+e.message)
+  );
+ }catch(e){say("Profil xatosi: "+e.message)}
 });
 </script>
 </body>
