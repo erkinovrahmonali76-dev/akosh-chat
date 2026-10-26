@@ -4,362 +4,386 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#080d18">
-<title>Akosh Chat</title>
+<title>AKOSH CHAT</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
+:root{--bg:#080d18;--panel:#101a2b;--panel2:#17243a;--blue:#2678ff;--text:#f4f7ff;--muted:#9cabc4;--line:#253550}
 *{box-sizing:border-box}
-body{margin:0;background:#080d18;color:#f4f7ff;font-family:Arial,sans-serif}
+body{margin:0;background:var(--bg);color:var(--text);font:15px Arial,sans-serif}
 button,input{font:inherit}
-button{border:0;border-radius:10px;background:#1877f2;color:white;padding:12px;cursor:pointer;font-weight:bold}
-input{width:100%;padding:13px;background:#091222;border:1px solid #30415f;border-radius:10px;color:white;margin:6px 0}
-.app{max-width:1050px;margin:auto;min-height:100vh;display:flex;flex-direction:column}
-header{padding:18px;background:#101a2c;border-bottom:1px solid #263650}
-h1{margin:0;color:#65a5ff}
-.muted{color:#a9b8d0;font-size:13px;line-height:1.5}
-#auth{margin:20px auto;width:min(430px,92%);padding:22px;background:#101a2c;border:1px solid #263650;border-radius:18px}
-#main{display:none;flex:1;min-height:0}
-.layout{display:grid;grid-template-columns:300px minmax(0,1fr);min-height:650px}
-.sidebar{padding:16px;border-right:1px solid #263650}
-.section-title{font-weight:bold;margin:12px 0}
-.person{width:100%;display:block;text-align:left;margin:6px 0;background:#14223a;border:1px solid #263650;padding:12px}
-.person small{display:block;color:#a9b8d0;margin-top:5px;font-weight:normal}
-#conversation{display:flex;flex-direction:column;min-width:0}
-.chathead{padding:16px;border-bottom:1px solid #263650}
-#messages{flex:1;min-height:260px;max-height:60vh;overflow:auto;padding:16px;display:flex;flex-direction:column;gap:10px}
-.bubble{max-width:85%;align-self:flex-start;background:#192942;padding:11px 13px;border-radius:14px;overflow-wrap:anywhere;white-space:pre-wrap}
-.bubble.mine{align-self:flex-end;background:#1459b8}
-.sender{font-size:12px;color:#c1d9ff;margin-bottom:5px}
-.composer{display:flex;gap:8px;padding:14px;border-top:1px solid #263650;background:#101a2c}
-.composer input{min-width:0;margin:0}
-#status{padding:12px 18px;color:#b9d6ff;overflow-wrap:anywhere}
-@media(max-width:650px){
-.layout{grid-template-columns:1fr;min-height:0}
-.sidebar{border-right:0;border-bottom:1px solid #263650}
-}
+button{border:0;cursor:pointer;border-radius:10px;padding:11px 14px;background:var(--blue);color:white;font-weight:600}
+input{width:100%;background:#0b1423;color:white;border:1px solid var(--line);padding:12px;border-radius:10px}
+.hidden{display:none!important}.muted{color:var(--muted);font-size:13px}
+.brand{font-size:24px;font-weight:900}.brand span{color:#4b91ff}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:17px;padding:18px}
+.stack{display:grid;gap:12px}.row{display:flex;align-items:center;gap:10px;min-width:0}
+.auth{max-width:420px;margin:8vh auto;padding:20px}
+.switch{display:flex;gap:8px;margin-bottom:16px}.switch button{flex:1;background:var(--panel2)}
+.switch .active{background:var(--blue)}
+#app{max-width:1200px;margin:auto;min-height:100vh;display:grid;grid-template-columns:330px 1fr}
+.sidebar{padding:18px;border-right:1px solid var(--line);min-width:0}
+.main{display:flex;flex-direction:column;min-width:0;min-height:100vh}
+.top{padding:18px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:10px}
+.section{margin-top:20px}.avatar{width:44px;height:44px;object-fit:cover;border-radius:50%;background:var(--panel2);flex-shrink:0}
+.useritem{display:flex;align-items:center;gap:10px;padding:10px;border-radius:12px;margin-top:5px;cursor:pointer}
+.useritem:hover,.useritem.selected{background:var(--panel2)}
+.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.storybar{display:flex;gap:12px;overflow:auto;padding:12px 0}
+.story{min-width:65px;text-align:center;cursor:pointer}
+.story .avatar{border:2px solid #448cff;padding:2px}
+.story small{display:block;margin-top:5px;max-width:70px;overflow:hidden;text-overflow:ellipsis}
+.content{padding:18px;flex:1;overflow:auto}
+.empty{text-align:center;color:var(--muted);margin:auto;padding:35px}
+.messages{display:flex;flex-direction:column;gap:10px}
+.bubble{max-width:80%;background:var(--panel2);padding:11px 14px;border-radius:14px;align-self:flex-start;overflow-wrap:anywhere}
+.bubble.mine{align-self:flex-end;background:#155bc6}
+.bubble time{display:block;font-size:10px;opacity:.7;margin-top:5px}
+.composer{display:flex;gap:8px;padding:14px;border-top:1px solid var(--line)}
+.composer input{flex:1;min-width:0}.smallbtn{padding:8px 10px;font-size:12px}
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#203451;padding:12px 18px;border-radius:12px;z-index:10;max-width:90%;display:none}
+.modal{position:fixed;inset:0;background:#000b;display:grid;place-items:center;padding:18px;z-index:5}
+.modal .card{width:min(500px,100%);max-height:85vh;overflow:auto}
+#storyMedia img,#storyMedia video{width:100%;max-height:60vh;object-fit:contain}
+@media(max-width:700px){#app{grid-template-columns:1fr}.sidebar{border-right:0;border-bottom:1px solid var(--line)}.main{min-height:60vh}.auth{margin:4vh auto;padding:14px}}
 </style>
 </head>
 <body>
-<div class="app">
-<header>
-<h1>🔵 Akosh Chat</h1>
-<div class="muted">Do‘stlaring bilan shaxsiy suhbat</div>
-</header>
-
-<section id="auth">
-<h2>Hisob yaratish</h2>
-<p class="muted">Username, email va parol bilan kir.</p>
-<input id="username" placeholder="Username: akosh11" maxlength="24">
-<input id="email" type="email" placeholder="Email" autocomplete="email">
-<input id="password" type="password" placeholder="Parol (kamida 6 belgi)" autocomplete="current-password">
-<button id="signup" style="width:100%;margin-top:8px">Ro‘yxatdan o‘tish</button>
-<button id="login" style="width:100%;margin-top:8px;background:#263650">Hisobga kirish</button>
+<section id="auth" class="auth">
+  <div class="brand">AKOSH <span>CHAT</span></div>
+  <p class="muted">Do‘stlaringiz bilan bog‘laning.</p>
+  <div class="card">
+    <div class="switch">
+      <button id="loginTab" class="active" onclick="setMode('login')">Kirish</button>
+      <button id="signupTab" onclick="setMode('signup')">Ro‘yxatdan o‘tish</button>
+    </div>
+    <form id="authForm" class="stack">
+      <div id="nameField" class="hidden">
+        <label>Ism</label><input id="displayName" maxlength="40" placeholder="Ismingiz">
+      </div>
+      <div id="usernameField" class="hidden">
+        <label>Username</label><input id="username" maxlength="24" placeholder="akosh_user">
+      </div>
+      <div><label>Email</label><input id="email" type="email" required placeholder="email@example.com"></div>
+      <div><label>Parol</label><input id="password" type="password" minlength="8" required placeholder="Kamida 8 belgi"></div>
+      <button id="authSubmit">Kirish</button>
+    </form>
+  </div>
 </section>
 
-<section id="main">
-<div class="layout">
-<aside class="sidebar">
-<div id="myName" class="section-title"></div>
-<button id="logout" style="width:100%;background:#263650">Chiqish</button>
-<div class="section-title">🔍 Do‘st qidirish</div>
-<input id="search" placeholder="Username yoz: akosh11">
-<button id="searchBtn" style="width:100%">Qidirish</button>
-<div id="searchResults"></div>
-<div class="section-title">💬 Shaxsiy chatlar</div>
-<div id="chatList" class="muted">Chatlar yuklanmoqda...</div>
-</aside>
+<div id="app" class="hidden">
+ <aside class="sidebar">
+  <div class="row" style="justify-content:space-between">
+    <div class="brand">AKOSH <span>CHAT</span></div>
+    <button class="smallbtn" onclick="logout()">Chiqish</button>
+  </div>
 
-<section id="conversation">
-<div class="chathead">
-<strong id="chatTitle">Suhbatni tanlang</strong>
-<div id="chatHint" class="muted">Do‘stni username orqali qidiring.</div>
-</div>
-<div id="messages"><p class="muted">Shaxsiy suhbatni boshlash uchun do‘st qidiring.</p></div>
-<div class="composer">
-<input id="messageInput" maxlength="2000" placeholder="Xabar yoz..." disabled>
-<button id="send" disabled>Yuborish</button>
-</div>
-</section>
-</div>
-</section>
-<p id="status" role="status"></p>
+  <div class="section card">
+    <div class="row">
+      <img id="myAvatar" class="avatar" alt="Profil rasmi">
+      <div><strong id="myName"></strong><div id="myUsername" class="muted"></div></div>
+    </div>
+    <div class="stack" style="margin-top:14px">
+      <label class="muted">Profil rasmi</label>
+      <input id="avatarFile" type="file" accept="image/*">
+      <button onclick="uploadAvatar()">Rasmni saqlash</button>
+      <button onclick="editProfile()" style="background:var(--panel2)">Profilni tahrirlash</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <strong>Stories · 24 soat</strong>
+    <div class="stack" style="margin-top:10px">
+      <input id="storyFile" type="file" accept="image/*,video/*">
+      <button onclick="uploadStory()">+ Story joylash</button>
+    </div>
+    <div id="stories" class="storybar"></div>
+  </div>
+
+  <div class="section">
+    <strong>Username orqali qidirish</strong>
+    <div class="row" style="margin-top:10px">
+      <input id="searchInput" placeholder="@username">
+      <button onclick="searchUsers()">Topish</button>
+    </div>
+    <div id="searchResults"></div>
+  </div>
+
+  <div class="section">
+    <strong>Suhbatlar</strong>
+    <div id="chatList" class="muted">Suhbatlar yuklanmoqda…</div>
+  </div>
+ </aside>
+
+ <main class="main">
+  <header class="top">
+    <div><strong id="chatTitle">AKOSH CHAT</strong><div id="chatSub" class="muted">Foydalanuvchini qidiring</div></div>
+    <button class="smallbtn" onclick="refreshAll()">Yangilash</button>
+  </header>
+  <div id="content" class="content">
+    <div class="empty"><h2>AKOSH CHAT</h2>Username orqali do‘st toping va suhbat boshlang.</div>
+  </div>
+  <form id="composer" class="composer hidden">
+    <input id="messageInput" maxlength="4000" placeholder="Xabar yozing…">
+    <button type="submit">Yuborish</button>
+  </form>
+ </main>
 </div>
 
-<script type="module">
-import {initializeApp} from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
-import {
- getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,
- onAuthStateChanged,signOut
-} from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
-import {
- getFirestore,doc,getDoc,setDoc,runTransaction,collection,addDoc,
- query,where,onSnapshot,orderBy,limit,serverTimestamp
-} from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+<div id="storyViewer" class="modal hidden">
+ <div class="card stack">
+  <div class="row" style="justify-content:space-between">
+   <strong id="storyTitle">Story</strong><button onclick="closeStory()">Yopish</button>
+  </div>
+  <div id="storyMedia"></div><div id="storyOwner" class="muted"></div>
+ </div>
+</div>
+<div id="toast"></div>
 
-const firebaseConfig={
- apiKey:"AIzaSyCSdBqAa2QYe7bGQ7SeC-BoSmbx6PwUku8",
- authDomain:"akoshgram-b6bd4.firebaseapp.com",
- projectId:"akoshgram-b6bd4",
- storageBucket:"akoshgram-b6bd4.firebasestorage.app",
- messagingSenderId:"374045331367",
- appId:"1:374045331367:web:e2a1ea9b7370702f453082"
-};
+<script>
+const SUPABASE_URL = "https://bynjgrrwlbqqyxohnlpm.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_wnt7_3ggyJvDtWxBlFeOTw_PywBtAl7";
 
-const app=initializeApp(firebaseConfig);
-const auth=getAuth(app);
-const db=getFirestore(app);
+const db = window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
+let currentUser=null,profile=null,activeChat=null,partner=null,timer=null;
+
 const $=id=>document.getElementById(id);
-const say=t=>$("status").textContent=t;
-const uname=v=>v.trim().replace(/^@/,"").toLowerCase();
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const initials=s=>(s||"?").slice(0,2).toUpperCase();
 
-let me=null,myUsername="",activeChat=null,busy=false;
-let stopMessages=null,stopChats=null;
-
-function validName(v){return /^[a-z0-9_]{3,24}$/.test(v)}
-
-async function createProfile(user,requestedName){
- const name=uname(requestedName);
- if(!validName(name))throw Error("Username 3–24 belgi bo‘lsin: harf, raqam va _.");
-
- await runTransaction(db,async tx=>{
-  const userRef=doc(db,"users",user.uid);
-  const nameRef=doc(db,"usernames",name);
-  const profile=await tx.get(userRef);
-  const nameDoc=await tx.get(nameRef);
-
-  if(profile.exists()&&profile.data().username){
-   myUsername=profile.data().username;
-   return;
-  }
-  if(nameDoc.exists()&&nameDoc.data().uid!==user.uid){
-   throw Error("Bu username band. Boshqasini tanlang.");
-  }
-  tx.set(userRef,{username:name,createdAt:serverTimestamp()});
-  tx.set(nameRef,{uid:user.uid,username:name});
-  myUsername=name;
- });
+function toast(s){
+  $("toast").textContent=s;$("toast").style.display="block";
+  setTimeout(()=>$("toast").style.display="none",3500);
+}
+function setMode(m){
+  $("loginTab").classList.toggle("active",m==="login");
+  $("signupTab").classList.toggle("active",m==="signup");
+  $("nameField").classList.toggle("hidden",m!=="signup");
+  $("usernameField").classList.toggle("hidden",m!=="signup");
+  $("authSubmit").textContent=m==="login"?"Kirish":"Hisob yaratish";
+  $("authForm").dataset.mode=m;
+}
+async function getProfile(id){
+  const r=await db.from("profiles").select("*").eq("id",id).maybeSingle();
+  if(r.error)throw r.error;return r.data;
+}
+function avatar(p){
+  return p?.avatar_url
+    ?`<img class="avatar" src="${esc(p.avatar_url)}" alt="">`
+    :`<div class="avatar" style="display:grid;place-items:center">${initials(p?.display_name||p?.username)}</div>`;
+}
+async function createProfile(user,username,name){
+  const r=await db.from("profiles").insert({
+    id:user.id,username,display_name:name||username
+  }).select().single();
+  if(r.error)throw r.error;return r.data;
 }
 
-$("signup").onclick=async()=>{
- if(busy)return;
- const name=uname($("username").value);
- const email=$("email").value.trim();
- const password=$("password").value;
-
- if(!validName(name)){say("Username 3–24 belgi bo‘lsin: harf, raqam va _.");return}
- if(!email){say("Email kiriting.");return}
- if(password.length<6){say("Parol kamida 6 belgi bo‘lsin.");return}
-
- busy=true;
- $("signup").disabled=true;
+$("authForm").addEventListener("submit",async e=>{
+ e.preventDefault();
+ const mode=$("authForm").dataset.mode||"login";
+ const email=$("email").value.trim(),password=$("password").value;
+ $("authSubmit").disabled=true;
  try{
-  const cred=await createUserWithEmailAndPassword(auth,email,password);
-  await createProfile(cred.user,name);
-  say("Hisob yaratildi!");
- }catch(e){
-  console.error("SIGNUP ERROR:",e);
-  say("Ro‘yxatdan o‘tish xatosi: "+(e.code||"")+" "+e.message);
- }finally{
-  busy=false;
-  $("signup").disabled=false;
- }
-};
-
-$("login").onclick=async()=>{
- try{
-  await signInWithEmailAndPassword(auth,$("email").value.trim(),$("password").value);
- }catch(e){
-  say("Kirish xatosi: "+(e.code||"")+" "+e.message);
- }
-};
-
-function stopListeners(){
- if(stopMessages)stopMessages();
- if(stopChats)stopChats();
- stopMessages=null;
- stopChats=null;
-}
-
-async function openChat(friendUid,friendName){
- if(!me||friendUid===me.uid){say("O‘zing bilan chat ocholmaysan.");return}
-
- try{
-  const ids=[me.uid,friendUid].sort();
-  const chatId=ids.join("__");
-  const chatRef=doc(db,"chats",chatId);
-  const snap=await getDoc(chatRef);
-
-  if(!snap.exists()){
-   await setDoc(chatRef,{
-    members:ids,
-    createdBy:me.uid,
-    createdAt:serverTimestamp()
-   });
-  }else if(!(snap.data().members||[]).includes(me.uid)||
-           !(snap.data().members||[]).includes(friendUid)){
-   throw Error("Chat a’zolari tekshiruvdan o‘tmadi.");
-  }
-
-  activeChat=chatId;
-  $("chatTitle").textContent="@"+friendName;
-  $("chatHint").textContent="Shaxsiy chat";
-  $("messageInput").disabled=false;
-  $("send").disabled=false;
-
-  if(stopMessages)stopMessages();
-  $("messages").replaceChildren();
-
-  const q=query(
-   collection(db,"chats",chatId,"messages"),
-   orderBy("createdAt","asc"),
-   limit(200)
-  );
-
-  stopMessages=onSnapshot(q,s=>{
-   const list=$("messages");
-   list.replaceChildren();
-   s.forEach(item=>{
-    const d=item.data();
-    const bubble=document.createElement("div");
-    bubble.className="bubble"+(d.senderId===me.uid?" mine":"");
-    const sender=document.createElement("div");
-    sender.className="sender";
-    sender.textContent=d.senderId===me.uid?"Siz":"@"+friendName;
-    const body=document.createElement("div");
-    body.textContent=d.text||"";
-    bubble.append(sender,body);
-    list.append(bubble);
-   });
-   list.scrollTop=list.scrollHeight;
-  },e=>say("Xabar xatosi: "+e.message));
-
- }catch(e){
-  console.error("OPEN CHAT ERROR:",e);
-  say("Chat ochilmadi: "+(e.code||"")+" "+e.message);
- }
-}
-
-$("searchBtn").onclick=async()=>{
- if(!me)return;
- const name=uname($("search").value);
- const results=$("searchResults");
- results.replaceChildren();
-
- if(!validName(name)){say("To‘liq username kiriting.");return}
-
- try{
-  const s=await getDoc(doc(db,"usernames",name));
-  if(!s.exists()){say("Bunday username topilmadi.");return}
-  const data=s.data();
-  if(data.uid===me.uid){say("Bu sening username’ing.");return}
-
-  const btn=document.createElement("button");
-  btn.className="person";
-  btn.textContent="@"+data.username;
-  const small=document.createElement("small");
-  small.textContent="Shaxsiy xabar yozish";
-  btn.append(small);
-  btn.onclick=()=>openChat(data.uid,data.username);
-  results.append(btn);
-  say("Foydalanuvchi topildi.");
- }catch(e){
-  say("Qidirish xatosi: "+(e.code||"")+" "+e.message);
- }
-};
-
-$("search").addEventListener("keydown",e=>{
- if(e.key==="Enter")$("searchBtn").click();
-});
-
-$("send").onclick=async()=>{
- const text=$("messageInput").value.trim();
- if(!me||!activeChat||!text||busy)return;
-
- busy=true;
- $("send").disabled=true;
- try{
-  await addDoc(collection(db,"chats",activeChat,"messages"),{
-   text,senderId:me.uid,createdAt:serverTimestamp()
-  });
-  $("messageInput").value="";
-  say("");
- }catch(e){
-  say("Xabar yuborilmadi: "+(e.code||"")+" "+e.message);
- }finally{
-  busy=false;
-  $("send").disabled=false;
- }
-};
-
-$("messageInput").addEventListener("keydown",e=>{
- if(e.key==="Enter")$("send").click();
-});
-$("logout").onclick=()=>signOut(auth);
-
-onAuthStateChanged(auth,async user=>{
- stopListeners();
- me=user;
- activeChat=null;
- $("auth").style.display=user?"none":"block";
- $("main").style.display=user?"block":"none";
- $("messageInput").disabled=true;
- $("send").disabled=true;
- $("messages").replaceChildren();
- $("chatList").textContent="";
-
- if(!user)return;
-
- try{
-  const profile=await getDoc(doc(db,"users",user.uid));
-
-  if(profile.exists()&&profile.data().username){
-   myUsername=profile.data().username;
-  }else{
-   const name=uname($("username").value);
-   if(!validName(name)){
-    say("Profil username topilmadi. Chiqib, ro‘yxatdan o‘tishda username kiriting yoki eski hisob uchun yordam so‘rang.");
-    return;
+  if(mode==="signup"){
+   const username=$("username").value.trim().replace(/^@/,"").toLowerCase();
+   const name=$("displayName").value.trim()||username;
+   if(!/^[a-z0-9_]{3,24}$/.test(username))throw Error("Username 3–24 ta belgi bo‘lsin.");
+   const result=await db.auth.signUp({email,password});
+   if(result.error)throw result.error;
+   if(!result.data.session){
+    toast("Emailni tasdiqlang, keyin tizimga kiring.");setMode("login");return;
    }
-   await createProfile(user,name);
+   await createProfile(result.data.user,username,name);
+  }else{
+   const r=await db.auth.signInWithPassword({email,password});
+   if(r.error)throw r.error;
   }
-
-  $("myName").textContent="@"+myUsername;
-
-  stopChats=onSnapshot(
-   query(collection(db,"chats"),where("members","array-contains",user.uid)),
-   async snap=>{
-    const list=$("chatList");
-    list.replaceChildren();
-
-    if(snap.empty){
-     list.textContent="Hali shaxsiy chat yo‘q. Username qidirib boshlang.";
-     return;
-    }
-
-    for(const item of snap.docs){
-     const data=item.data();
-     const friendUid=(data.members||[]).find(id=>id!==user.uid);
-     if(!friendUid)continue;
-
-     try{
-      const p=await getDoc(doc(db,"users",friendUid));
-      const friendName=p.exists()?p.data().username:"foydalanuvchi";
-      const btn=document.createElement("button");
-      btn.className="person";
-      btn.textContent="@"+friendName;
-      btn.onclick=()=>openChat(friendUid,friendName);
-      list.append(btn);
-     }catch(e){
-      console.error("PROFILE READ ERROR:",e);
-     }
-    }
-   },
-   e=>say("Chatlar yuklanmadi: "+e.message)
-  );
- }catch(e){
-  console.error("PROFILE ERROR:",e);
-  say("Profil xatosi: "+(e.code||"")+" "+e.message);
- }
+  await boot();
+ }catch(err){toast(err.message||"Xatolik yuz berdi");}
+ finally{$("authSubmit").disabled=false;}
 });
+
+async function boot(){
+ const r=await db.auth.getUser(),user=r.data.user;
+ if(!user){showAuth();return;}
+ currentUser=user;
+ try{
+  profile=await getProfile(user.id);
+  if(!profile){
+   let u=(user.email||"user").split("@")[0].replace(/[^a-z0-9_]/gi,"").toLowerCase();
+   if(u.length<3)u="user_"+user.id.slice(0,8);
+   profile=await createProfile(user,u,u);
+  }
+  $("auth").classList.add("hidden");$("app").classList.remove("hidden");
+  $("myName").textContent=profile.display_name;
+  $("myUsername").textContent="@"+profile.username;
+  $("myAvatar").src=profile.avatar_url||"";
+  await refreshAll();
+  clearInterval(timer);timer=setInterval(()=>refreshAll(true),7000);
+ }catch(err){toast("Profil xatosi: "+err.message);}
+}
+function showAuth(){
+ currentUser=null;profile=null;activeChat=null;partner=null;
+ clearInterval(timer);$("app").classList.add("hidden");$("auth").classList.remove("hidden");
+}
+async function logout(){await db.auth.signOut();showAuth();}
+db.auth.onAuthStateChange((event)=>{if(event==="SIGNED_OUT")showAuth();});
+
+async function uploadFile(bucket,file){
+ if(!file)throw Error("Fayl tanlang.");
+ if(file.size>8*1024*1024)throw Error("Fayl 8 MB dan kichik bo‘lsin.");
+ const ext=(file.name.split(".").pop()||"jpg").toLowerCase().replace(/[^a-z0-9]/g,"");
+ const path=`${currentUser.id}/${crypto.randomUUID()}.${ext}`;
+ const r=await db.storage.from(bucket).upload(path,file,{contentType:file.type||"application/octet-stream"});
+ if(r.error)throw r.error;
+ return db.storage.from(bucket).getPublicUrl(path).data.publicUrl;
+}
+async function uploadAvatar(){
+ try{
+  const file=$("avatarFile").files[0];
+  if(!file||!file.type.startsWith("image/"))throw Error("Rasm tanlang.");
+  const url=await uploadFile("avatars",file);
+  const r=await db.from("profiles").update({avatar_url:url}).eq("id",currentUser.id);
+  if(r.error)throw r.error;
+  profile=await getProfile(currentUser.id);$("myAvatar").src=url;
+  toast("Profil rasmi saqlandi.");
+ }catch(e){toast(e.message);}
+}
+async function editProfile(){
+ const name=prompt("Ismingiz:",profile.display_name);if(name===null)return;
+ const username=prompt("Username:",profile.username);if(username===null)return;
+ const u=username.trim().replace(/^@/,"").toLowerCase();
+ if(!/^[a-z0-9_]{3,24}$/.test(u)){toast("Username noto‘g‘ri.");return;}
+ try{
+  const r=await db.from("profiles").update({display_name:name.trim().slice(0,40)||u,username:u}).eq("id",currentUser.id);
+  if(r.error)throw r.error;
+  profile=await getProfile(currentUser.id);
+  $("myName").textContent=profile.display_name;$("myUsername").textContent="@"+profile.username;
+  toast("Profil yangilandi.");
+ }catch(e){toast(e.message);}
+}
+async function searchUsers(){
+ const q=$("searchInput").value.trim().replace(/^@/,"").toLowerCase();
+ if(!q){$("searchResults").innerHTML="";return;}
+ try{
+  const r=await db.from("profiles").select("*").ilike("username",q).neq("id",currentUser.id).limit(20);
+  if(r.error)throw r.error;
+  $("searchResults").innerHTML=r.data.length?r.data.map(p=>`
+   <div class="useritem">${avatar(p)}
+    <div style="flex:1;min-width:0"><b>${esc(p.display_name)}</b><div class="muted">@${esc(p.username)}</div></div>
+    <button class="smallbtn" data-open="${p.id}">Chat</button></div>`).join(""):"<p class='muted'>Topilmadi.</p>";
+  $("searchResults").querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>openChat(b.dataset.open));
+ }catch(e){toast(e.message);}
+}
+$("searchInput").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();searchUsers();}});
+
+async function openChat(id){
+ try{
+  const p=await getProfile(id);if(!p)throw Error("Profil topilmadi.");
+  const [a,b]=[currentUser.id,id].sort();
+  let r=await db.from("chats").select("*").eq("member_a",a).eq("member_b",b).maybeSingle();
+  if(r.error)throw r.error;
+  let chat=r.data;
+  if(!chat){
+   const created=await db.from("chats").insert({member_a:a,member_b:b}).select().single();
+   if(created.error){
+    const again=await db.from("chats").select("*").eq("member_a",a).eq("member_b",b).single();
+    if(again.error)throw created.error;chat=again.data;
+   }else chat=created.data;
+  }
+  activeChat=chat;partner=p;
+  $("chatTitle").textContent=p.display_name;$("chatSub").textContent="@"+p.username;
+  $("composer").classList.remove("hidden");
+  await renderMessages();await loadChats();
+ }catch(e){toast(e.message);}
+}
+async function renderMessages(){
+ if(!activeChat)return;
+ const r=await db.from("messages").select("*").eq("chat_id",activeChat.id).order("created_at").limit(200);
+ if(r.error)throw r.error;
+ $("content").innerHTML=`<div class="messages">${r.data.map(m=>`
+ <div class="bubble ${m.sender_id===currentUser.id?"mine":""}">${esc(m.body)}
+ <time>${new Date(m.created_at).toLocaleString()}</time></div>`).join("")}</div>`;
+ $("content").scrollTop=$("content").scrollHeight;
+}
+$("composer").addEventListener("submit",async e=>{
+ e.preventDefault();if(!activeChat)return;
+ const body=$("messageInput").value.trim();if(!body)return;
+ $("messageInput").value="";
+ const r=await db.from("messages").insert({chat_id:activeChat.id,sender_id:currentUser.id,body});
+ if(r.error){toast(r.error.message);return;}
+ try{await renderMessages();await loadChats();}catch(e){toast(e.message);}
+});
+async function loadChats(){
+ const r=await db.from("chats").select("*")
+ .or(`member_a.eq.${currentUser.id},member_b.eq.${currentUser.id}`)
+ .order("created_at",{ascending:false}).limit(50);
+ if(r.error)throw r.error;
+ if(!r.data.length){$("chatList").innerHTML="<p class='muted'>Suhbatlar hali yo‘q.</p>";return;}
+ const ids=[...new Set(r.data.map(c=>c.member_a===currentUser.id?c.member_b:c.member_a))];
+ const pr=await db.from("profiles").select("*").in("id",ids);
+ if(pr.error)throw pr.error;
+ const map=new Map(pr.data.map(p=>[p.id,p]));
+ $("chatList").innerHTML=r.data.map(c=>{
+  const id=c.member_a===currentUser.id?c.member_b:c.member_a,p=map.get(id);
+  if(!p)return "";
+  return `<div class="useritem ${activeChat?.id===c.id?"selected":""}" data-chat="${id}">
+   ${avatar(p)}<div><b>${esc(p.display_name)}</b><div class="muted">@${esc(p.username)}</div></div></div>`;
+ }).join("");
+ $("chatList").querySelectorAll("[data-chat]").forEach(el=>el.onclick=()=>openChat(el.dataset.chat));
+}
+async function uploadStory(){
+ try{
+  const file=$("storyFile").files[0];
+  if(!file||(!file.type.startsWith("image/")&&!file.type.startsWith("video/")))throw Error("Rasm yoki video tanlang.");
+  const url=await uploadFile("stories",file);
+  const r=await db.from("stories").insert({
+   user_id:currentUser.id,media_url:url,
+   media_type:file.type.startsWith("video/")?"video":"image",
+   expires_at:new Date(Date.now()+86400000).toISOString()
+  });
+  if(r.error)throw r.error;
+  $("storyFile").value="";toast("Story joylandi.");await loadStories();
+ }catch(e){toast(e.message);}
+}
+async function loadStories(){
+ const r=await db.from("stories").select("*").gt("expires_at",new Date().toISOString()).order("created_at",{ascending:false}).limit(100);
+ if(r.error)throw r.error;
+ const ids=[...new Set(r.data.map(s=>s.user_id))];
+ let profiles=[];
+ if(ids.length){
+  const p=await db.from("profiles").select("*").in("id",ids);
+  if(p.error)throw p.error;profiles=p.data;
+ }
+ const map=new Map(profiles.map(p=>[p.id,p]));
+ $("stories").innerHTML=r.data.map(s=>{
+  const p=map.get(s.user_id);if(!p)return "";
+  return `<div class="story" data-story="${s.id}">${avatar(p)}<small>${esc(p.username)}</small></div>`;
+ }).join("")||"<span class='muted'>Hali story yo‘q.</span>";
+ $("stories").querySelectorAll("[data-story]").forEach(el=>el.onclick=()=>viewStory(el.dataset.story));
+}
+async function viewStory(id){
+ try{
+  const r=await db.from("stories").select("*").eq("id",id).gt("expires_at",new Date().toISOString()).single();
+  if(r.error)throw r.error;
+  const p=await getProfile(r.data.user_id);
+  $("storyTitle").textContent=p?.display_name||"Story";
+  $("storyOwner").textContent="@"+(p?.username||"");
+  $("storyMedia").innerHTML=r.data.media_type==="video"
+   ?`<video src="${esc(r.data.media_url)}" controls autoplay playsinline></video>`
+   :`<img src="${esc(r.data.media_url)}" alt="Story">`;
+  $("storyViewer").classList.remove("hidden");
+ }catch(e){toast("Story topilmadi yoki muddati tugagan.");}
+}
+function closeStory(){$("storyViewer").classList.add("hidden");$("storyMedia").innerHTML="";}
+$("storyViewer").addEventListener("click",e=>{if(e.target===$("storyViewer"))closeStory();});
+async function refreshAll(silent=false){
+ if(!currentUser)return;
+ try{await Promise.all([loadStories(),loadChats()]);if(activeChat)await renderMessages();}
+ catch(e){if(!silent)toast(e.message);}
+}
+setMode("login");
+boot();
 </script>
 </body>
 </html>
